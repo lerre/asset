@@ -61,7 +61,6 @@ class actionBuy extends \MyAPP\Controller\Api
                 $dbAsset->insertAsset([
                     'user_id' => $userId,
                     'coin_id' => $coinId,
-                    'number' => 0,
                     'create_at' => $date,
                     'update_at' => $date
                 ]);
@@ -74,17 +73,41 @@ class actionBuy extends \MyAPP\Controller\Api
                 $this->error('买入失败');
             }
 
+            //交易计数+1
             $dbTransCount->incrTransCount($userId);
 
+            //更新成本均价
+            $res = $dbAsset->getLine($param, 'number,cost');
+            if ($res) {
+                if ($res['cost'] > 0.00) {
+                    $total = round($res['number'] * $res['cost'] + $number * $price, 2);
+                    $data = [
+                        'cost' => round($total / ($res['number'] + $number), 2)
+                    ];
+                } else {
+                    $data = [
+                        'cost' => $price
+                    ];
+                }
+                $where = 'user_id=:user_id AND coin_id=:coin_id';
+                $whereParam = [
+                    ':user_id' => $userId,
+                    ':coin_id' => $coinId
+                ];
+                $dbAsset->updateAsset($data, $where, $whereParam);
+            }
+
+            //记录交易来源
             $dbAssetPlace = new AssetPlace();
-            $dbAssetPlace->insertAssetPlace([
+            $data = [
                 'user_id' => $userId,
                 'coin_id' => $coinId,
                 'place' => $place,
                 'number' => $number,
                 'create_at' => $date,
                 'update_at' => $date
-            ], $number, $date);
+            ];
+            $dbAssetPlace->insertAssetPlace($data, $number, $date);
 
             $this->success([
                 'msg' => '买入成功'
