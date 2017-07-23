@@ -6,8 +6,8 @@ use MyApp\Package\Db\User;
 
 class actionConnect extends \MyAPP\Controller\Api
 {
-    CONST APP_ID = 'wx4a2620cb8f73e5c1';
-    CONST APP_SECRET = '549a391c954b8fd9903fa51a859d395c';
+    CONST APP_ID = 'wx5aef3adc020ac6be';
+    CONST APP_SECRET = '3949d4d2c6fea2c728cf5305e3ddf1f7';
 
     CONST WX_INFO = 'https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code';
 
