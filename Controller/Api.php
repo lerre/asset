@@ -46,7 +46,7 @@ abstract class Api extends Controller
                 $userId = $accessToken['id'];
                 $token = $accessToken['token'];
                 $dbUser = new User();
-                $rsUser = $dbUser->getByUserId($userId, 'openid');
+                $rsUser = $dbUser->getLine(['id' => $userId], 'openid');
                 if (!empty($rsUser['openid']) && md5($userId . $rsUser['openid']) == $token) {
                     return $userId;
                 }
