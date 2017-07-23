@@ -40,9 +40,9 @@ class actionList extends \MyAPP\Controller\Api
 
         foreach ($data as $k => $v) {
             $res = [];
-            $res['name'] = $v[0];
-            $res['short_name'] = $v[1];
-            $res['zhong_name'] = $v[2];
+            $res['coin_id'] = $v[0];
+            $res['coin'] = $v[1];
+            $res['coin_name'] = $v[2];
             $currencyDb->insertCurrency($res);
         }
 
