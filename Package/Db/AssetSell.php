@@ -5,12 +5,12 @@ namespace MyAPP\Package\Db;
 use My\Package\Db;
 
 /**
- * asset表
+ * asset_sell表
  */
-class Asset extends Db
+class AssetSell extends Db
 {
     protected $databaseName = 'asset';
-    protected $tableName = 'asset';
+    protected $tableName = 'asset_sell';
 
     public function getLine($param, $field = '*')
     {
@@ -24,15 +24,5 @@ class Asset extends Db
         if (!empty($order)) $sql .= ' ORDER BY ' . $order;
         if (!empty($limit)) $sql .= ' LIMIT ' . $limit;
         return $this->queryAll($sql, $param);
-    }
-
-    public function insertAsset($data)
-    {
-        return $this->insert($this->tableName, $data, 'ignore');
-    }
-
-    public function updateAsset($data, $where, $whereParam)
-    {
-        return $this->update($this->tableName, $data, $where, $whereParam);
     }
 }

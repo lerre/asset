@@ -21,7 +21,7 @@ class actionList extends \MyAPP\Controller\Api
         $param = [
             'user_id' => $userId
         ];
-        $field = 'coin_id,number,cost';
+        $field = 'coin_id,number,new_cost';
         $order = 'create_at DESC';
         $rsAssetList = $dbAsset->getList($param, $field, $order);
 

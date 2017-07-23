@@ -5,7 +5,7 @@ namespace MyAPP\Package\Db;
 use My\Package\Db;
 
 /**
- * Currency表
+ * currency表
  */
 class Currency extends Db
 {

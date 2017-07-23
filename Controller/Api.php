@@ -225,4 +225,14 @@ abstract class Api extends Controller
     {
         return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
     }
+
+    /**
+     * 获取两位浮点数
+     * @param $data
+     * @return float
+     */
+    function getDecimal($data)
+    {
+        return round($data, 2);
+    }
 }

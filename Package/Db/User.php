@@ -5,7 +5,7 @@ namespace MyAPP\Package\Db;
 use My\Package\Db;
 
 /**
- * User表
+ * user表
  */
 class User extends Db
 {

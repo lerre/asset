@@ -5,7 +5,7 @@ namespace MyAPP\Package\Db;
 use My\Package\Db;
 
 /**
- * TransCount表
+ * trans_count表
  */
 class TransCount extends Db
 {

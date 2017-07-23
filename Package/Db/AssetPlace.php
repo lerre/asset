@@ -5,7 +5,7 @@ namespace MyAPP\Package\Db;
 use My\Package\Db;
 
 /**
- * AssetPlace表
+ * asset_place表
  */
 class AssetPlace extends Db
 {

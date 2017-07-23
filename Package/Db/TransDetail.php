@@ -5,7 +5,7 @@ namespace MyAPP\Package\Db;
 use My\Package\Db;
 
 /**
- * TransDetail表
+ * trans_detail表
  */
 class TransDetail extends Db
 {
