@@ -9,7 +9,6 @@ use MyApp\Package\Db\TransDetail;
 
 class actionDetail extends \MyAPP\Controller\Api
 {
-    CONST API_URL_PRICE = 'https://api.coinmarketcap.com/v1/ticker/%s/?convert=CNY';
     CONST TYPE_BUY = 1;
     CONST TYPE_SELL = 2;
 
@@ -34,9 +33,7 @@ class actionDetail extends \MyAPP\Controller\Api
         //持币数
         $number = isset($assetData['number']) ? (int)$assetData['number'] : 0;
         //当前价
-        $priceData = $this->curl(sprintf(self::API_URL_PRICE, $coinId));
-        $priceData = json_decode($priceData, true);
-        $price = isset($priceData[0]['price_cny']) ? round($priceData[0]['price_cny'], 2) : 0.00;
+        $price = $this->getPrice($coinId);
         //成本价
         if ($cost == 0.00) {
             $cost = round($price / $number, 2);
@@ -45,7 +42,7 @@ class actionDetail extends \MyAPP\Controller\Api
         $worth = round($price * $number, 2);
 
         //当日盈亏 TODO 昨日凌晨价格
-        $pastPrice = mt_rand(100, 100000);
+        $pastPrice = $this->getPastPrice($coinId);
         $currProfile = $this->getDecimal(($price - $pastPrice) * $number);
 
         //持仓盈亏
@@ -137,5 +134,10 @@ class actionDetail extends \MyAPP\Controller\Api
         $output['asset_trans_list'] = $assetTransList;
 
         $this->success($output);
+    }
+
+    private function getPastPrice($coinId)
+    {
+        return mt_rand(100, 100000);
     }
 }

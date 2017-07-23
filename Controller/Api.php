@@ -227,6 +227,20 @@ abstract class Api extends Controller
     }
 
     /**
+     * 获取比特币对人民币的价格
+     * @param $coinId
+     * @return float
+     */
+    function getPrice($coinId)
+    {
+        $API_URL_PRICE = 'https://api.coinmarketcap.com/v1/ticker/%s/?convert=CNY';
+        $priceData = $this->curl(sprintf($API_URL_PRICE, $coinId));
+        $priceData = json_decode($priceData, true);
+        $price = isset($priceData[0]['price_cny']) ? round($priceData[0]['price_cny'], 2) : 0.00;
+        return $price;
+    }
+
+    /**
      * 获取两位浮点数
      * @param $data
      * @return float
