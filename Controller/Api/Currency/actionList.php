@@ -8,6 +8,10 @@ class actionList extends \MyAPP\Controller\Api
 {
     public function main()
     {
+        if ($this->isPost()) {
+            $this->insertData();
+        }
+
         $output = [];
 
         $dbCurrency = new Currency();
