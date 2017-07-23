@@ -31,16 +31,17 @@ class actionSell extends \MyAPP\Controller\Api
                 'user_id' => $userId,
                 'coin_id' => $coinId
             ];
-            $res = $dbAsset->getLine($param, 'number');
+            $res = $dbAsset->getLine($param, 'number,cost');
             if (empty($res)) {
                 $this->error('币数不足');
             } elseif ($res['number'] < $number) {
                 $this->error('币数不足');
             }
+            $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
 
             $dbTransDetail = new TransDetail();
 
-            $res = $dbTransDetail->sell($userId, $coinId, $number, $price, $date);
+            $res = $dbTransDetail->sell($userId, $coinId, $number, $price, $cost, $date);
             if (empty($res)) {
                 $this->error('卖出失败');
             }

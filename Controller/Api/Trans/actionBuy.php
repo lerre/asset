@@ -43,7 +43,6 @@ class actionBuy extends \MyAPP\Controller\Api
                 $dbTransCount->insertTransCount([
                     'user_id' => $userId,
                     'date' => $currDate,
-                    'count' => 0,
                     'create_at' => $date,
                     'update_at' => $date
                 ]);
@@ -56,7 +55,7 @@ class actionBuy extends \MyAPP\Controller\Api
                 'user_id' => $userId,
                 'coin_id' => $coinId
             ];
-            $res = $dbAsset->getLine($param, 'number');
+            $res = $dbAsset->getLine($param, 'number,cost');
             if (empty($res)) {
                 $dbAsset->insertAsset([
                     'user_id' => $userId,
@@ -65,10 +64,11 @@ class actionBuy extends \MyAPP\Controller\Api
                     'update_at' => $date
                 ]);
             }
+            $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
 
             $dbTransDetail = new TransDetail();
 
-            $res = $dbTransDetail->buy($userId, $coinId, $number, $price, $place, $date);
+            $res = $dbTransDetail->buy($userId, $coinId, $number, $price, $place, $cost, $date);
             if (empty($res)) {
                 $this->error('买入失败');
             }
@@ -81,12 +81,14 @@ class actionBuy extends \MyAPP\Controller\Api
             if ($res) {
                 if ($res['cost'] > 0.00) {
                     $total = round($res['number'] * $res['cost'] + $number * $price, 2);
+                    $cost = round($total / ($res['number'] + $number), 2);
                     $data = [
-                        'cost' => round($total / ($res['number'] + $number), 2)
+                        'cost' => $cost
                     ];
                 } else {
+                    $cost = $price;
                     $data = [
-                        'cost' => $price
+                        'cost' => $cost
                     ];
                 }
                 $where = 'user_id=:user_id AND coin_id=:coin_id';

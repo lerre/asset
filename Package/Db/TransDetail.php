@@ -47,7 +47,7 @@ class TransDetail extends Db
         return $this->exec('UPDATE', $sql);
     }
 
-    public function buy($userId, $coinId, $number, $price, $place, $date)
+    public function buy($userId, $coinId, $number, $price, $place, $cost, $date)
     {
         try {
             $this->beginTransaction();
@@ -64,6 +64,7 @@ class TransDetail extends Db
                 'number' => $number,
                 'price' => $price,
                 'place' => $place,
+                'cost' => $cost,
                 'create_at' => $date,
                 'update_at' => $date
             ];
@@ -83,7 +84,7 @@ class TransDetail extends Db
         return true;
     }
 
-    public function sell($userId, $coinId, $number, $price, $date)
+    public function sell($userId, $coinId, $number, $price, $cost, $date)
     {
         try {
             $this->beginTransaction();
@@ -99,6 +100,7 @@ class TransDetail extends Db
                 'coin_id' => $coinId,
                 'number' => $number,
                 'price' => $price,
+                'cost' => $cost,
                 'create_at' => $date,
                 'update_at' => $date
             ];
