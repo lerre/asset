@@ -4,7 +4,7 @@ namespace MyAPP\Controller;
 
 use My\Controller;
 use My\Request;
-use MyAPP\Package\Db\Admin\Wallet;
+use MyAPP\Package\Db\User;
 
 abstract class Api extends Controller
 {
@@ -45,14 +45,14 @@ abstract class Api extends Controller
             if (!empty($accessToken['id']) && !empty($accessToken['token'])) {
                 $userId = $accessToken['id'];
                 $token = $accessToken['token'];
-                $walletDb = new Wallet();
-                $walletData = $walletDb->getByUserId($userId, 'wallet_id');
-                if (!empty($walletData['wallet_id']) && md5($userId.$walletData['wallet_id']) == $token) {
+                $dbUser = new User();
+                $rsUser = $dbUser->getByUserId($userId, 'openid');
+                if (!empty($rsUser['openid']) && md5($userId . $rsUser['openid']) == $token) {
                     return $userId;
                 }
             }
         }
-        return 5;
+        return null;
     }
 
     /**
