@@ -56,11 +56,6 @@ class TransDetail extends Db
         try {
             $this->beginTransaction();
 
-            $res = $this->incrAsset($userId, $coinId, $number);
-            if (empty($res)) {
-                $this->rollback();
-            }
-
             $data = [
                 'user_id' => $userId,
                 'date' => $date,
@@ -76,6 +71,13 @@ class TransDetail extends Db
             $res = $this->insertTransDetail($data);
             if (empty($res)) {
                 $this->rollback();
+                return false;
+            }
+
+            $res = $this->incrAsset($userId, $coinId, $number);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
             }
 
             $this->commit();
@@ -96,11 +98,6 @@ class TransDetail extends Db
         try {
             $this->beginTransaction();
 
-            $res = $this->decrAsset($userId, $coinId, $number);
-            if (empty($res)) {
-                $this->rollback();
-            }
-
             $data = [
                 'user_id' => $userId,
                 'date' => $date,
@@ -115,6 +112,13 @@ class TransDetail extends Db
             $res = $this->insertTransDetail($data);
             if (empty($res)) {
                 $this->rollback();
+                return false;
+            }
+
+            $res = $this->decrAsset($userId, $coinId, $number);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
             }
 
             $this->commit();

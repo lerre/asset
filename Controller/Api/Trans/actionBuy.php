@@ -70,7 +70,7 @@ class actionBuy extends \MyAPP\Controller\Api
             $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
 
             $dbTransDetail = new TransDetail();
-            $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place, $cost, $date);
+            $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place, $cost);
             if (empty($res)) {
                 $this->error('买入失败');
             }
