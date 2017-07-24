@@ -86,7 +86,7 @@ class actionDetail extends \MyAPP\Controller\Api
         if (!empty($rsAssetPlace)) {
             foreach ($rsAssetPlace as $k => $v) {
                 $number = !empty($v['number']) ? (int)$v['number'] : 0;
-                $percent = !empty($totalNumber) ? sprintf('%s%%', round($number * 100 / $totalNumber)) : 0%;
+                $percent = !empty($totalNumber) ? sprintf('%s%%', round($number * 100 / $totalNumber)) : '0%';
                 if (!empty($v['place'])) {
                     $assetPlaceList[$v['place']] = $percent;
                 } else {
