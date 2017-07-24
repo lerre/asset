@@ -36,7 +36,7 @@ class actionDetail extends \MyAPP\Controller\Api
         $price = $this->getPrice($coinId);
         //成本价
         if ($cost == 0.00) {
-            $cost = round($price / $number, 2);
+            $cost = !empty($number) ? round($price / $number, 2) : 0.00;
         }
         //持币总值: 当前价*持币数
         $worth = round($price * $number, 2);
