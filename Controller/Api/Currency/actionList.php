@@ -20,10 +20,9 @@ class actionList extends \MyAPP\Controller\Api
         if (!empty($data)) {
             foreach ($data as $k => $v) {
                 $str = '';
-                if (!empty($v['coin'])) $str = $v['coin'];
-                if (!empty($v['coin_name'])) $str .= ' - ' . $v['coin_name'];
-                if (!empty($v['coin_id'])) $str .= ' - ' . $v['coin_id'];
-                $result[$k] = $str;
+                if (!empty($v['coin'])) $result[$k]['coin'] = $v['coin'];
+                if (!empty($v['coin_name'])) $result[$k]['coin_name'] = $v['coin_name'];
+                if (!empty($v['coin_id'])) $result[$k]['coin_id'] = $v['coin_id'];
             }
         }
 
