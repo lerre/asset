@@ -52,7 +52,7 @@ abstract class Api extends Controller
                 }
             }
         }
-        return null;
+        return 100;
     }
 
     /**
