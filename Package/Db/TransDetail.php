@@ -35,38 +35,43 @@ class TransDetail extends Db
         return $this->insert($this->tableName, $data);
     }
 
-    private function incrAsset($userId, $coinId, $number, $date)
+    private function incrAsset($userId, $coinId, $number)
     {
-        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number+' . $number . ',update_at="' . $date . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $currDate = date('Y-m-d H:i:s');
+        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number+' . $number . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    private function decrAsset($userId, $coinId, $number, $date)
+    private function decrAsset($userId, $coinId, $number)
     {
-        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number-' . $number . ',update_at="' . $date . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $currDate = date('Y-m-d H:i:s');
+        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number-' . $number . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    public function buy($userId, $coinId, $number, $price, $place, $cost, $date)
+    public function buy($userId, $date, $coinId, $number, $price, $place, $cost)
     {
+        $currDate = date('Y-m-d H:i:s');
+
         try {
             $this->beginTransaction();
 
-            $res = $this->incrAsset($userId, $coinId, $number, $date);
+            $res = $this->incrAsset($userId, $coinId, $number);
             if (empty($res)) {
                 $this->rollback();
             }
 
             $data = [
                 'user_id' => $userId,
+                'date' => $date,
                 'type' => self::TYPE_BUY,
                 'coin_id' => $coinId,
                 'number' => $number,
                 'price' => $price,
                 'place' => $place,
                 'cost' => $cost,
-                'create_at' => $date,
-                'update_at' => $date
+                'create_at' => $currDate,
+                'update_at' => $currDate
             ];
             $res = $this->insertTransDetail($data);
             if (empty($res)) {
@@ -84,25 +89,28 @@ class TransDetail extends Db
         return true;
     }
 
-    public function sell($userId, $coinId, $number, $price, $cost, $date)
+    public function sell($userId, $date, $coinId, $number, $price, $cost)
     {
+        $currDate = date('Y-m-d H:i:s');
+
         try {
             $this->beginTransaction();
 
-            $res = $this->decrAsset($userId, $coinId, $number, $date);
+            $res = $this->decrAsset($userId, $coinId, $number);
             if (empty($res)) {
                 $this->rollback();
             }
 
             $data = [
                 'user_id' => $userId,
+                'date' => $date,
                 'type' => self::TYPE_SELL,
                 'coin_id' => $coinId,
                 'number' => $number,
                 'price' => $price,
                 'cost' => $cost,
-                'create_at' => $date,
-                'update_at' => $date
+                'create_at' => $currDate,
+                'update_at' => $currDate
             ];
             $res = $this->insertTransDetail($data);
             if (empty($res)) {

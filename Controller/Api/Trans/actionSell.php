@@ -12,17 +12,22 @@ class actionSell extends \MyAPP\Controller\Api
 
     public function main()
     {
-        if ($this->isPost()) {
+        if ($this->isPost())
+        {
             if (empty($this->userId)) {
                 $this->error(1001, '用户未登录');
             }
-            $userId = $this->userId;
-            $coinId = $this->request->getRequest()->string('coin_id');
-            $number = $this->request->getRequest()->int('number');
-            $price = $this->request->getRequest()->string('price');
-            $date = $this->getTime();
 
-            if ($price <= 0 || $number <= 0) {
+            $userId = $this->userId;
+
+            $raw = $this->request->getRaw();
+            $coinId = $raw['coin_id'];
+            $number = $raw['number'];
+            $price = $raw['price'];
+            $date = $raw['date'];
+            $date = date('Y-m-d', strtotime($date));
+
+            if ($price <= 0 || $number <= 0 || $date <= '1970-01-01') {
                 $this->error(1001, '参数错误~');
             }
 
@@ -40,8 +45,7 @@ class actionSell extends \MyAPP\Controller\Api
             $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
 
             $dbTransDetail = new TransDetail();
-
-            $res = $dbTransDetail->sell($userId, $coinId, $number, $price, $cost, $date);
+            $res = $dbTransDetail->sell($userId, $date, $coinId, $number, $price, $cost);
             if (empty($res)) {
                 $this->error('卖出失败');
             }

@@ -15,36 +15,39 @@ class actionBuy extends \MyAPP\Controller\Api
 
     public function main()
     {
-        if ($this->isPost()) {
+        if ($this->isPost())
+        {
             if (empty($this->userId)) {
                 $this->error(1001, '用户未登录');
             }
-            $userId = $this->userId;
-            $coinId = $this->request->getRequest()->string('coin_id');
-            $number = $this->request->getRequest()->int('number');
-            $price = $this->request->getRequest()->string('price');
-            $place = $this->request->getRequest()->string('place');
-            $date = $this->getTime();
-            $currDate = date('Y-m-d', strtotime($date));
 
-            if ($price <= 0 || $number <= 0) {
+            $userId = $this->userId;
+            $currDate = date('Y-m-d H:i:s');
+
+            $raw = $this->request->getRaw();
+            $coinId = isset($raw['coin_id']) ? $raw['coin_id'] : '';
+            $number = isset($raw['number']) ? $raw['number'] : '';
+            $price = isset($raw['price']) ? $raw['price'] : '';
+            $place = isset($raw['place']) ? $raw['place'] : '';
+            $date = isset($raw['date']) ? $raw['date'] : '';
+            $date = date('Y-m-d', strtotime($date));
+
+            if ($price <= 0 || $number <= 0 || $date <= '1970-01-01') {
                 $this->error(1001, '参数错误~');
             }
 
             $dbTransCount = new TransCount();
-
             $param = [
                 'user_id' => $userId,
-                'date' => $currDate
+                'date' => $date
             ];
-
             $res = $dbTransCount->getLine($param, 'count');
             if (empty($res)) {
                 $dbTransCount->insertTransCount([
                     'user_id' => $userId,
-                    'date' => $currDate,
-                    'create_at' => $date,
-                    'update_at' => $date
+                    'date' => $date,
+                    'create_at' => $currDate,
+                    'update_at' => $currDate
                 ]);
             } elseif ($res['count'] >= self::BUY_COUNT_MAX) {
                 $this->error(1001, '今日买入已达上限，请明日再来~');
@@ -60,15 +63,14 @@ class actionBuy extends \MyAPP\Controller\Api
                 $dbAsset->insertAsset([
                     'user_id' => $userId,
                     'coin_id' => $coinId,
-                    'create_at' => $date,
-                    'update_at' => $date
+                    'create_at' => $currDate,
+                    'update_at' => $currDate
                 ]);
             }
             $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
 
             $dbTransDetail = new TransDetail();
-
-            $res = $dbTransDetail->buy($userId, $coinId, $number, $price, $place, $cost, $date);
+            $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place, $cost, $date);
             if (empty($res)) {
                 $this->error('买入失败');
             }
