@@ -85,12 +85,14 @@ class actionDetail extends \MyAPP\Controller\Api
         $assetPlaceList = [];
         if (!empty($rsAssetPlace)) {
             foreach ($rsAssetPlace as $k => $v) {
+                $place = !empty($v['place']) ? $v['place'] : '';
                 $number = !empty($v['number']) ? (int)$v['number'] : 0;
-                $percent = !empty($totalNumber) ? sprintf('%s%%', round($number * 100 / $totalNumber)) : '0%';
-                if (!empty($v['place'])) {
-                    $assetPlaceList[$v['place']] = $percent;
+                $percent = !empty($totalNumber) ? sprintf('%s%%', round($number * 100 / $totalNumber)) : 0;
+                $assetPlaceList[$k]['percent'] = $percent;
+                if ($place) {
+                    $assetPlaceList[$k]['place'] = $place;
                 } else {
-                    $assetPlaceList['未知渠道'] = $percent;
+                    $assetPlaceList[$k]['place'] = '未知渠道';
                 }
             }
         }
