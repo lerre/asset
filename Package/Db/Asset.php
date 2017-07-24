@@ -14,7 +14,7 @@ class Asset extends Db
 
     public function getLine($param, $field = '*')
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id = :user_id And coin_id = :coin_id';
         return $this->query($sql, $param);
     }
 
