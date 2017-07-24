@@ -72,7 +72,7 @@ class actionBuy extends \MyAPP\Controller\Api
             $dbTransDetail = new TransDetail();
             $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place, $cost);
             if (empty($res)) {
-                $this->error('买入失败');
+                return $this->error(1002, '买入失败');
             }
 
             //交易计数+1
@@ -113,7 +113,7 @@ class actionBuy extends \MyAPP\Controller\Api
             ];
             $dbAssetPlace->insertAssetPlace($data, $number, $date);
 
-            $this->success([
+            return $this->success([
                 'msg' => '买入成功'
             ]);
         }

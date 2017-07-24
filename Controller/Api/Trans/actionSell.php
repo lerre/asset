@@ -28,7 +28,7 @@ class actionSell extends \MyAPP\Controller\Api
             $date = date('Y-m-d', strtotime($date));
 
             if ($price <= 0 || $number <= 0 || $date <= '1970-01-01') {
-                $this->error(1001, '参数错误~');
+                return $this->error(1001, '参数错误~');
             }
 
             $dbAsset = new Asset();
@@ -38,16 +38,16 @@ class actionSell extends \MyAPP\Controller\Api
             ];
             $res = $dbAsset->getLine($param, 'number,cost');
             if (empty($res)) {
-                $this->error('币数不足');
+                return $this->error(1002, '币数不足');
             } elseif ($res['number'] < $number) {
-                $this->error('币数不足');
+                return $this->error(1003, '币数不足');
             }
             $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
 
             $dbTransDetail = new TransDetail();
             $res = $dbTransDetail->sell($userId, $date, $coinId, $number, $price, $cost);
             if (empty($res)) {
-                $this->error('卖出失败');
+                return $this->error(1004, '卖出失败');
             }
 
             //更新成本均价
@@ -71,7 +71,7 @@ class actionSell extends \MyAPP\Controller\Api
                 $dbAsset->updateAsset($data, $where, $whereParam);
             }
 
-            $this->success([
+            return $this->success([
                 'msg' => '卖出成功'
             ]);
         }
