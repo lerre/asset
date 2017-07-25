@@ -55,7 +55,9 @@ class actionList extends \MyAPP\Controller\Api
         $rsAssetList = $dbAsset->getList($param, $field, $order);
 
         $assetList = [];
+        $worth = 0;
         $currProfit = 0.00;
+        $costProfit = 0.00;
         $holdProfit = 0.00;
 
         if (!empty($rsAssetList)) {
@@ -73,7 +75,7 @@ class actionList extends \MyAPP\Controller\Api
                     //$assetList[$k]['curr_profit'] = '暂未收录';
                     //$assetList[$k]['hold_profit'] = '暂未收录';
                     $assetList[$k]['accumulated_profile'] = '暂未收录';
-                    $assetList[$k]['accumulated_profile_rate'] = sprintf('%s%%', round(10, 99));
+                    $assetList[$k]['accumulated_profile_rate'] = '暂未收录';
                     continue;
                 }
                 $profit = !empty($v['profit']) ? (float)$v['profit'] : 0.00;
@@ -87,10 +89,13 @@ class actionList extends \MyAPP\Controller\Api
                     $assetList[$k]['coin_id'] = $coinId; //币种
                     $assetList[$k]['price'] = $price; //最新价
                     $assetList[$k]['cost'] = $cost; //成本价
-                    $assetList[$k]['worth'] = $price * $number; //市值
+                    $assetList[$k]['worth'] = $this->getDecimal($price * $number); //市值
+                    $worth += $assetList[$k]['worth'];
                     //当日盈亏
                     //$assetList[$k]['curr_profit'] = ($price - $pastPrice) * $number;
                     $currProfit += ($price - $pastPrice) * $number;
+                    //持币成本
+                    $costProfit += $profit;
                     //持币盈亏
                     //$assetList[$k]['hold_profit'] = ($price - $cost) * $number;
                     $holdProfit += ($price - $cost) * $number;
@@ -100,6 +105,8 @@ class actionList extends \MyAPP\Controller\Api
                     } else {
                         $assetList[$k]['accumulated_profile'] = $holdProfit;
                     }
+                    //累积盈亏率
+                    $assetList[$k]['accumulated_profile_rate'] = $this->getDecimal(($assetList[$k]['accumulated_profile'] - $profit) / $profit);
                 }
             }
         }
@@ -107,10 +114,11 @@ class actionList extends \MyAPP\Controller\Api
         $accumulatedProfit = $holdProfit + $sellProfit;
 
         $output['user_id'] = $userId;
-        $output['worth'] = round(mt_rand(100000, 100000000) . '.' . mt_rand(10, 99), 2);
+        $output['worth'] = $worth;
         $output['curr_profit'] = $currProfit;
         $output['hold_profit'] = $holdProfit;
         $output['accumulated_profit'] = $accumulatedProfit;
+        $output['accumulated_profile_rate'] = $this->getDecimal(($accumulatedProfit - $costProfit) / $costProfit);
         $output['list'] = array_values($assetList);
 
         $this->success($output);
