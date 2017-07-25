@@ -60,7 +60,7 @@ class actionList extends \MyAPP\Controller\Api
             }
         }
 
-        $dbAssetSell = new AssetSel();
+        $dbAssetSell = new AssetSell();
         $param = [
             'user_id' => $userId
         ];
