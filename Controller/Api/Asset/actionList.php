@@ -4,6 +4,7 @@ namespace MyAPP\Controller\Api\Asset;
 
 use MyApp\Package\Db\Asset;
 use MyApp\Package\Db\AssetSell;
+use MyApp\Package\Db\Currency;
 
 class actionList extends \MyAPP\Controller\Api
 {
