@@ -106,6 +106,7 @@ class actionList extends \MyAPP\Controller\Api
 
         $accumulatedProfit = $holdProfit + $sellProfit;
 
+        $output['user_id'] = $userId;
         $output['worth'] = round(mt_rand(100000, 100000000) . '.' . mt_rand(10, 99), 2);
         $output['curr_profit'] = $currProfit;
         $output['hold_profit'] = $holdProfit;
