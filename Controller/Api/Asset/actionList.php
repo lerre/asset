@@ -106,7 +106,7 @@ class actionList extends \MyAPP\Controller\Api
                         $assetList[$k]['accumulated_profile'] = $holdProfit;
                     }
                     //累积盈亏率
-                    $assetList[$k]['accumulated_profile_rate'] = $this->getDecimal(($assetList[$k]['accumulated_profile'] - $profit) / $profit);
+                    $assetList[$k]['accumulated_profile_rate'] = !empty($profit) ? $this->getDecimal(($assetList[$k]['accumulated_profile'] - $profit) / $profit) : 0;
                 }
             }
         }
@@ -118,7 +118,7 @@ class actionList extends \MyAPP\Controller\Api
         $output['curr_profit'] = $currProfit;
         $output['hold_profit'] = $holdProfit;
         $output['accumulated_profit'] = $accumulatedProfit;
-        $output['accumulated_profile_rate'] = $this->getDecimal(($accumulatedProfit - $costProfit) / $costProfit);
+        $output['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal(($accumulatedProfit - $costProfit) / $costProfit) : 0;
         $output['list'] = array_values($assetList);
 
         $this->success($output);
