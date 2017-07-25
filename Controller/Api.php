@@ -233,10 +233,17 @@ abstract class Api extends Controller
      */
     function getPrice($coinId)
     {
+        static $pool = [];
+        if (isset($pool[$coinId])) {
+            return $pool[$coinId];
+        }
         $API_URL_PRICE = 'https://api.coinmarketcap.com/v1/ticker/%s/?convert=CNY';
         $priceData = $this->curl(sprintf($API_URL_PRICE, $coinId));
         $priceData = json_decode($priceData, true);
         $price = isset($priceData[0]['price_cny']) ? round($priceData[0]['price_cny'], 2) : 0.00;
+        if ($price != 0.00) {
+            $pool[$coinId] = $price;
+        }
         return $price;
     }
 
