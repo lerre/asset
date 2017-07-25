@@ -69,7 +69,7 @@ class actionList extends \MyAPP\Controller\Api
                     $assetList[$k]['coin_id'] = $coinId; //币种
                     $assetList[$k]['price'] = '暂未收录'; //最新价
                     $assetList[$k]['cost'] = '暂未收录'; //成本价
-                    $assetList[$k]['worth'] = '暂未收录' * $number; //市值
+                    $assetList[$k]['worth'] = '暂未收录'; //市值
                     //$assetList[$k]['curr_profit'] = '暂未收录';
                     //$assetList[$k]['hold_profit'] = '暂未收录';
                     $assetList[$k]['accumulated_profile'] = '暂未收录';
