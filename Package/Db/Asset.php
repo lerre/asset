@@ -35,4 +35,14 @@ class Asset extends Db
     {
         return $this->update($this->tableName, $data, $where, $whereParam);
     }
+
+    public function deleteAll($userId, $coinId)
+    {
+        $where = 'user_id = :user_id And coin_id = :coin_id';
+        $whereParam = [
+            ':user_id' => $userId,
+            ':coin_id' => $coinId
+        ];
+        return $this->delete($this->tableName, $where, $whereParam);
+    }
 }

@@ -25,4 +25,14 @@ class AssetSell extends Db
         if (!empty($limit)) $sql .= ' LIMIT ' . $limit;
         return $this->queryAll($sql, $param);
     }
+
+    public function deleteAll($userId, $coinId)
+    {
+        $where = 'user_id = :user_id And coin_id = :coin_id';
+        $whereParam = [
+            ':user_id' => $userId,
+            ':coin_id' => $coinId
+        ];
+        return $this->delete($this->tableName, $where, $whereParam);
+    }
 }

@@ -131,4 +131,14 @@ class TransDetail extends Db
 
         return true;
     }
+
+    public function deleteAll($userId, $coinId)
+    {
+        $where = 'user_id = :user_id And coin_id = :coin_id';
+        $whereParam = [
+            ':user_id' => $userId,
+            ':coin_id' => $coinId
+        ];
+        return $this->delete($this->tableName, $where, $whereParam);
+    }
 }
