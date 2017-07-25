@@ -14,7 +14,7 @@ class AssetPlace extends Db
 
     public function getList($param, $field = '*')
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id = :user_id And coin_id = :coin_id';
         return $this->queryAll($sql, $param);
     }
 
