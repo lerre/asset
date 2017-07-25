@@ -5,6 +5,7 @@ namespace MyAPP\Controller\Api\Asset;
 use MyApp\Package\Db\Asset;
 use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\AssetPlace;
+use MyApp\Package\Db\Currency;
 use MyApp\Package\Db\TransDetail;
 
 class actionDetail extends \MyAPP\Controller\Api
@@ -19,19 +20,40 @@ class actionDetail extends \MyAPP\Controller\Api
         }
         $userId = $this->userId;
         $coinId = $this->request->getRequest()->string('coin_id');
+        $maxId = $this->request->getRequest()->int('max_id');
+        $pageSize = $this->request->getRequest()->int('page_size', 10);
+        if ($pageSize > 10) {
+            $pageSize = 10;
+        }
+
+        if (empty($coinId)) {
+            return $this->error(1002, '请指定币种');
+        }
 
         $output = [];
+
+        //币种
+        $coinIdList = [];
+
+        $dbCurrency = new Currency();
+        $data = $dbCurrency->getList('coin_id');
+        if (!empty($data)) {
+            foreach ($data as $k => $v) {
+                $coinIdList[] = $v['coin_id'];
+            }
+        }
 
         $dbAsset = new Asset();
         $param = [
             'user_id' => $userId,
             'coin_id' => $coinId
         ];
-        $assetData = $dbAsset->getLine($param, 'number,cost');
+        $rsAsset = $dbAsset->getLine($param, 'number,cost');
+
         //成本价
-        $cost = isset($assetData['cost']) ? (float)$assetData['cost'] : 0.00;
+        $cost = isset($rsAsset['cost']) ? (float)$rsAsset['cost'] : 0.00;
         //持币数
-        $number = isset($assetData['number']) ? (int)$assetData['number'] : 0;
+        $number = isset($rsAsset['number']) ? (int)$rsAsset['number'] : 0;
         //当前价
         $price = $this->getPrice($coinId);
         //成本价
@@ -58,13 +80,23 @@ class actionDetail extends \MyAPP\Controller\Api
         $sellProfile = isset($rsAssetSell['profit']) ? $rsAssetSell['profit'] : 0.00;
         $accumulatedProfile = $holdProfile + $sellProfile;
 
-        $output['worth'] = $worth;
-        $output['price'] = $price;
-        $output['number'] = $number;
-        $output['cost'] = $cost;
-        $output['curr_profile'] = $currProfile;
-        $output['hold_profile'] = $holdProfile;
-        $output['accumulated_profile'] = $accumulatedProfile;
+        $output['worth'] = $worth; //持币总值
+        $output['price'] = $price; //最新价
+        $output['number'] = $number; //持币数
+        $output['cost'] = $cost; //成本价
+        $output['curr_profile'] = $currProfile; //当日盈亏
+        $output['hold_profile'] = $holdProfile; //持仓盈亏
+        $output['accumulated_profile'] = $accumulatedProfile; //累积盈亏
+
+        if (!in_array($coinId, $coinIdList)) {
+            $output['worth'] = '暂未收录'; //持币总值
+            $output['price'] = '暂未收录'; //最新价
+            $output['number'] = $number; //持币数
+            $output['cost'] = $cost; //成本价
+            $output['curr_profile'] = '暂未收录'; //当日盈亏
+            $output['hold_profile'] = '暂未收录'; //持仓盈亏
+            $output['accumulated_profile'] = '暂未收录'; //累积盈亏
+        }
 
         //资产分布
         $dbAssetPlace = new AssetPlace();
@@ -88,6 +120,9 @@ class actionDetail extends \MyAPP\Controller\Api
                 $place = !empty($v['place']) ? $v['place'] : '';
                 $number = !empty($v['number']) ? (int)$v['number'] : 0;
                 $percent = !empty($totalNumber) ? sprintf('%s%%', round($number * 100 / $totalNumber)) : 0;
+                if (empty($percent)) {
+                    continue;
+                }
                 $assetPlaceList[$k]['percent'] = $percent;
                 if ($place) {
                     $assetPlaceList[$k]['place'] = $place;
@@ -99,16 +134,15 @@ class actionDetail extends \MyAPP\Controller\Api
 
         //交易记录
         $dbTransDetail = new TransDetail();
-        $param = [
-            'user_id' => $userId,
-            'coin_id' => $coinId
-        ];
-        $rsTransDetail = $dbTransDetail->getLatest($param, 'type,coin_id,number,price,create_at', 'create_at DESC', 20);
+        $rsTransDetail = $dbTransDetail->getPaginationList($userId, $maxId, 'id,type,coin_id,number,price,create_at', $pageSize);
 
         $assetTransList = [];
         $assetTransSellList = [];
         if (!empty($rsTransDetail)) {
             foreach ($rsTransDetail as $k => $v) {
+                $id = (int)$v['id'];
+                $idArr[] = $id;
+                $assetTransList[$k]['id'] = $id;
                 $type = !empty($v['type']) ? (int)$v['type'] : 0;
                 switch ($type) {
                     case self::TYPE_BUY:
@@ -134,6 +168,7 @@ class actionDetail extends \MyAPP\Controller\Api
 
         $output['asset_place_list'] = $assetPlaceList;
         $output['asset_trans_list'] = $assetTransList;
+        $output['min_id'] = min($idArr);
 
         $this->success($output);
     }

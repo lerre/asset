@@ -18,14 +18,19 @@ class TransDetail extends Db
 
     public function getList($param, $field = '*')
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE ';
         return $this->queryAll($sql, $param);
     }
 
-    public function getLatest($param, $field = '*', $order = '', $limit = 20)
+    public function getPaginationList($userId, $maxId, $field = '*', $limit = 20)
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName;
-        if (!empty($order)) $sql .= ' ORDER BY ' . $order;
+        $param['user_id'] = $userId;
+        $sqlAppend = '';
+        if (!empty($maxId)) {
+            $param['id'] = $maxId;
+            $sqlAppend = 'AND id<:id';
+        }
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id=:user_id ' . $sqlAppend . ' ORDER BY id DESC';
         if (!empty($limit)) $sql .= ' LIMIT ' . $limit;
         return $this->queryAll($sql, $param);
     }
