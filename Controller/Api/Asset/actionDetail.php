@@ -48,8 +48,10 @@ class actionDetail extends \MyAPP\Controller\Api
             'user_id' => $userId,
             'coin_id' => $coinId
         ];
-        $rsAsset = $dbAsset->getLine($param, 'number,cost');
+        $rsAsset = $dbAsset->getLine($param, 'profit,number,cost');
 
+        //持币成本
+        $profit = isset($rsAsset['profit']) ? (float)$rsAsset['profit'] : 0.00;
         //成本价
         $cost = isset($rsAsset['cost']) ? (float)$rsAsset['cost'] : 0.00;
         //持币数
@@ -58,7 +60,9 @@ class actionDetail extends \MyAPP\Controller\Api
         $price = $this->getPrice($coinId);
         //成本价
         if ($cost == 0.00) {
-            $cost = !empty($number) ? round($price / $number, 2) : 0.00;
+            $cost = !empty($number) ? round($profit / $number, 2) : 0.00; //持币成本单价
+        } else {
+            $profit = round($cost * $number, 2); //持币成本
         }
         //持币总值: 当前价*持币数
         $worth = round($price * $number, 2);
