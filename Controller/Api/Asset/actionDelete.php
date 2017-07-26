@@ -39,7 +39,9 @@ class actionDelete extends \MyAPP\Controller\Api
             $dbTransDetail = new TransDetail();
             $dbTransDetail->deleteAll($userId, $coinId);
 
-            $this->success();
+            return $this->success([
+                'msg' => '删除成功'
+            ]);
         }
     }
 }
