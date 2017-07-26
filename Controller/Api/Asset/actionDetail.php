@@ -101,6 +101,8 @@ class actionDetail extends \MyAPP\Controller\Api
             $output['curr_profile'] = '暂未收录'; //当日盈亏
             $output['hold_profile'] = '暂未收录'; //持仓盈亏
             $output['accumulated_profile'] = '暂未收录'; //累积盈亏
+        } else {
+            $assetList[$k]['included'] = true;
         }
 
         //资产分布

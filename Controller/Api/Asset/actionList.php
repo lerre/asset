@@ -78,6 +78,8 @@ class actionList extends \MyAPP\Controller\Api
                     $assetList[$k]['accumulated_profile'] = '暂未收录';
                     $assetList[$k]['accumulated_profile_rate'] = '暂未收录';
                     continue;
+                } else {
+                    $assetList[$k]['included'] = true;
                 }
                 $profit = !empty($v['profit']) ? (float)$v['profit'] : 0.00;
                 $cost = !empty($v['cost']) ? (float)$v['cost'] : 0.00;
