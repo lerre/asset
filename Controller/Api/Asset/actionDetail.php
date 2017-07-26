@@ -93,6 +93,7 @@ class actionDetail extends \MyAPP\Controller\Api
         $output['accumulated_profile'] = $accumulatedProfile; //累积盈亏
 
         if (!in_array($coinId, $coinIdList)) {
+            $assetList[$k]['included'] = false;
             $output['worth'] = '暂未收录'; //持币总值
             $output['price'] = '暂未收录'; //最新价
             $output['number'] = $number; //持币数

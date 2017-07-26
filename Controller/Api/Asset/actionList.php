@@ -68,6 +68,7 @@ class actionList extends \MyAPP\Controller\Api
                     continue;
                 }
                 if (!in_array($coinId, $coinIdList)) { //未收录
+                    $assetList[$k]['included'] = false;
                     $assetList[$k]['coin_id'] = $coinId; //币种
                     $assetList[$k]['price'] = '暂未收录'; //最新价
                     $assetList[$k]['cost'] = '暂未收录'; //成本价
