@@ -31,12 +31,11 @@ class TransCount extends Db
         return $this->update($this->tableName, $data, $where, $whereParam);
     }
 
-    public function deleteAll($userId, $coinId)
+    public function deleteAll($userId)
     {
-        $where = 'user_id = :user_id And coin_id = :coin_id';
+        $where = 'user_id = :user_id';
         $whereParam = [
-            ':user_id' => $userId,
-            ':coin_id' => $coinId
+            ':user_id' => $userId
         ];
         return $this->delete($this->tableName, $where, $whereParam);
     }

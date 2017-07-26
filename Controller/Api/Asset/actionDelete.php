@@ -34,7 +34,7 @@ class actionDelete extends \MyAPP\Controller\Api
             $dbAssetSell->deleteAll($userId, $coinId);
 
             $dbTransCount = new TransCount();
-            $dbTransCount->deleteAll($userId, $coinId);
+            $dbTransCount->deleteAll($userId);
 
             $dbTransDetail = new TransDetail();
             $dbTransDetail->deleteAll($userId, $coinId);
