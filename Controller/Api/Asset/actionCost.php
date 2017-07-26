@@ -23,7 +23,7 @@ class actionCost extends \MyAPP\Controller\Api
 
             $raw = $this->request->getRaw();
             $coinId = isset($raw['coin_id']) ? $raw['coin_id'] : '';
-            $cost = isset($raw['coin_id']) ? (float)$raw['cost'] : 0.00;
+            $cost = isset($raw['cost']) ? (float)$raw['cost'] : 0.00;
 
             if (empty($coinId)) {
                 return $this->error(1002, '请指定币种');
