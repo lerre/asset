@@ -3,6 +3,7 @@
 namespace MyAPP\Controller\Api\Trans;
 
 use MyApp\Package\Db\Asset;
+use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\TransDetail;
 
 class actionSell extends \MyAPP\Controller\Api
@@ -19,6 +20,7 @@ class actionSell extends \MyAPP\Controller\Api
             }
 
             $userId = $this->userId;
+            $currDate = date('Y-m-d H:i:s');
 
             $raw = $this->request->getRaw();
             $coinId = $raw['coin_id'];
@@ -36,13 +38,34 @@ class actionSell extends \MyAPP\Controller\Api
                 'user_id' => $userId,
                 'coin_id' => $coinId
             ];
-            $res = $dbAsset->getLine($param, 'number,cost');
+            $res = $dbAsset->getLine($param, 'profit,number,cost');
             if (empty($res)) {
                 return $this->error(1002, '币数不足');
             } elseif ($res['number'] < $number) {
                 return $this->error(1003, '币数不足');
             }
+
+            //持币成本单价
             $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
+            if ($cost <= 0.00) {
+                $cost = !empty($res['number']) ? (float)$res['profit'] / $res['number'] : 0.00;
+            }
+
+            //初始化asset_sell
+            $dbAssetSell = new AssetSell();
+            $param = [
+                'user_id' => $userId,
+                'coin_id' => $coinId
+            ];
+            $res = $dbAssetSell->getLine($param, 'profit');
+            if (empty($res)) {
+                $dbAssetSell->insertAssetSell([
+                    'user_id' => $userId,
+                    'coin_id' => $coinId,
+                    'create_at' => $currDate,
+                    'update_at' => $currDate
+                ]);
+            }
 
             $dbTransDetail = new TransDetail();
             $res = $dbTransDetail->sell($userId, $date, $coinId, $number, $price, $cost);

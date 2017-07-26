@@ -2,8 +2,8 @@
 
 namespace MyAPP\Controller\Api\Trans;
 
-use MyApp\Package\Db\TransCount;
 use MyApp\Package\Db\Asset;
+use MyApp\Package\Db\TransCount;
 use MyApp\Package\Db\TransDetail;
 use MyApp\Package\Db\AssetPlace;
 
@@ -53,12 +53,13 @@ class actionBuy extends \MyAPP\Controller\Api
                 $this->error(1001, '今日买入已达上限，请明日再来~');
             }
 
+            //初始化asset
             $dbAsset = new Asset();
             $param = [
                 'user_id' => $userId,
                 'coin_id' => $coinId
             ];
-            $res = $dbAsset->getLine($param, 'number,cost');
+            $res = $dbAsset->getLine($param, 'profit,number,cost');
             if (empty($res)) {
                 $dbAsset->insertAsset([
                     'user_id' => $userId,
@@ -67,7 +68,12 @@ class actionBuy extends \MyAPP\Controller\Api
                     'update_at' => $currDate
                 ]);
             }
+
+            //持币成本单价
             $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
+            if ($cost <= 0.00) {
+                $cost = !empty($res['number']) ? (float)$res['profit'] / $res['number'] : 0.00;
+            }
 
             $dbTransDetail = new TransDetail();
             $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place, $cost);
@@ -77,29 +83,6 @@ class actionBuy extends \MyAPP\Controller\Api
 
             //交易计数+1
             $dbTransCount->incrTransCount($userId);
-
-            //更新成本均价
-            $res = $dbAsset->getLine($param, 'number,cost');
-            if ($res) {
-                if ($res['cost'] > 0.00) {
-                    $total = round($res['number'] * $res['cost'] + $number * $price, 2);
-                    $cost = round($total / ($res['number'] + $number), 2);
-                    $data = [
-                        'cost' => $cost
-                    ];
-                } else {
-                    $cost = $price;
-                    $data = [
-                        'cost' => $cost
-                    ];
-                }
-                $where = 'user_id=:user_id AND coin_id=:coin_id';
-                $whereParam = [
-                    ':user_id' => $userId,
-                    ':coin_id' => $coinId
-                ];
-                $dbAsset->updateAsset($data, $where, $whereParam);
-            }
 
             //记录交易来源
             $dbAssetPlace = new AssetPlace();

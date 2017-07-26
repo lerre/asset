@@ -26,6 +26,11 @@ class AssetSell extends Db
         return $this->queryAll($sql, $param);
     }
 
+    public function insertAssetSell($data)
+    {
+        return $this->insert($this->tableName, $data, 'ignore');
+    }
+
     public function deleteAll($userId, $coinId)
     {
         $where = 'user_id = :user_id And coin_id = :coin_id';
