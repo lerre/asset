@@ -73,27 +73,6 @@ class actionSell extends \MyAPP\Controller\Api
                 return $this->error(1004, '卖出失败');
             }
 
-            //更新成本均价
-            $res = $dbAsset->getLine($param, 'number,cost');
-            if ($res) {
-                if ($res['cost'] > 0.00 && $res['number'] > $number) {
-                    $total = round($res['number'] * $res['cost'] - $number * $price, 2);
-                    $data = [
-                        'cost' => round($total / ($res['number'] - $number), 2)
-                    ];
-                } else {
-                    $data = [
-                        'cost' => 0.00
-                    ];
-                }
-                $where = 'user_id=:user_id AND coin_id=:coin_id';
-                $whereParam = [
-                    ':user_id' => $userId,
-                    ':coin_id' => $coinId
-                ];
-                $dbAsset->updateAsset($data, $where, $whereParam);
-            }
-
             return $this->success([
                 'msg' => '卖出成功'
             ]);

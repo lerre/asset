@@ -17,6 +17,12 @@ class TransDetail extends Db
     protected $tableAssetName = 'asset';
     protected $tableAssetSellName = 'asset_sell';
 
+    public function getLine($param, $field = '*')
+    {
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id = :user_id AND coin_id = :coin_id AND type = :type';
+        return $this->query($sql, $param);
+    }
+
     public function getList($param, $field = '*')
     {
         $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE ';
@@ -112,7 +118,7 @@ class TransDetail extends Db
         $currDate = date('Y-m-d H:i:s');
 
         //持币成本减量
-        $costProfit = $cost > 0.00 ? $number * $cost : $number * $price;
+        $costProfit = $number * $cost;
 
         //卖出盈亏增量
         $sellProfit = $number * ($price - $cost);
@@ -158,6 +164,62 @@ class TransDetail extends Db
         }
 
         return true;
+    }
+
+    public function transUpdate($userId, $coinId, $number, $price, $dataTransDetail)
+    {
+        $currDate = date('Y-m-d H:i:s');
+
+        //当时持币成本单价
+        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
+        $oldPrice = isset($dataTransDetail['price']) ? (float)$dataTransDetail['price'] : 0.00;
+
+        //持币成本差价
+        $costProfit = ($number - $dataTransDetail['number']) * $cost;
+
+        //卖出盈亏差价
+        $sellProfit = $number * ($price - $cost) - $dataTransDetail['number'] * ($oldPrice - $cost);
+
+        try {
+            $this->beginTransaction();
+
+            $data = [
+                'number' => $number,
+                'price' => $price,
+                'update_at' => $currDate
+            ];
+            $res = $this->insertTransDetail($data);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->incrAsset($userId, $coinId, $number, $costProfit);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->incrAssetSell($userId, $coinId, $sellProfit);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $this->commit();
+            $this->endTransaction();
+        } catch (\PDOException $e) {
+            $this->rollback();
+            $this->endTransaction();
+            return false;
+        }
+
+        return true;
+    }
+
+    public function transDelete($userId, $coinId, $number, $price, $cost)
+    {
+
     }
 
     public function deleteAll($userId, $coinId)
