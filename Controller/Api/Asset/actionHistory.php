@@ -64,6 +64,7 @@ class actionHistory extends \MyAPP\Controller\Api
                 $number = !empty($v['number']) ? (int)$v['number'] : 0;
                 if (!in_array($coinId, $coinIdList)) { //未收录
                     $assetList[$k]['included'] = false;
+                    $assetList[$k]['coin_id'] = $coinId; //币种
                     continue;
                 } else {
                     $assetList[$k]['included'] = true;
