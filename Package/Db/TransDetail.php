@@ -23,6 +23,12 @@ class TransDetail extends Db
         return $this->query($sql, $param);
     }
 
+    public function getById($param, $field = '*')
+    {
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE id = :id AND :user_id AND coin_id = :coin_id AND type = :type';
+        return $this->query($sql, $param);
+    }
+
     public function getList($param, $field = '*')
     {
         $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE ';

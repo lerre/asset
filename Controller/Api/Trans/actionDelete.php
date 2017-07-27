@@ -28,21 +28,22 @@ class actionDelete extends \MyAPP\Controller\Api
             $coinId = isset($raw['coin_id']) ? $raw['coin_id'] : '';
 
             if (empty($id)) {
-                $this->error(1002, '交易ID错误~');
+                $this->error(1002, '交易ID无效');
             }
             if (!in_array($type, [self::TYPE_BUY, self::TYPE_SELL])) {
-                $this->error(1003, '交易类型错误~');
+                $this->error(1003, '交易类型错误');
             }
 
             $dbTransDetail = new TransDetail();
             $param = [
+                'id' => $id,
                 'user_id' => $userId,
                 'coin_id' => $coinId,
                 'type' => $type
             ];
-            $rsTransDetail = $dbTransDetail->getLine($param, 'number,price,place,cost');
+            $rsTransDetail = $dbTransDetail->getById($param, 'number,price,place,cost');
             if (empty($rsTransDetail)) {
-                return $this->error(1003, '交易记录不存在');
+                return $this->error(1004, '交易记录不存在');
             }
 
             if ($type == self::TYPE_BUY) {
@@ -63,7 +64,7 @@ class actionDelete extends \MyAPP\Controller\Api
                 }
                 $rs = $dbTransDetail->transBuyDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {
-                    return $this->error(1003, '编辑失败');
+                    return $this->error(1005, '编辑失败');
                 }
             } else {
                 //初始化asset_sell
@@ -83,7 +84,7 @@ class actionDelete extends \MyAPP\Controller\Api
                 }
                 $rs = $dbTransDetail->transSellDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {
-                    return $this->error(1003, '编辑失败');
+                    return $this->error(1006, '编辑失败');
                 }
             }
 
