@@ -30,7 +30,7 @@ class User extends Db
 
     public function getLine($param, $field)
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE open_id = :openid';
         return $this->query($sql, $param);
     }
 
