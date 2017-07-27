@@ -8,6 +8,9 @@ use MyApp\Package\Db\TransDetail;
 
 class actionUpdate extends \MyAPP\Controller\Api
 {
+    CONST TYPE_BUY = 1;
+    CONST TYPE_SELL = 2;
+
     public function main()
     {
         if ($this->isPost())
@@ -79,7 +82,7 @@ class actionUpdate extends \MyAPP\Controller\Api
             }
 
             return $this->success([
-                'msg' => '买入成功'
+                'msg' => '编辑成功'
             ]);
         }
     }

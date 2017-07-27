@@ -64,7 +64,7 @@ class actionDelete extends \MyAPP\Controller\Api
                 }
                 $rs = $dbTransDetail->transBuyDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {
-                    return $this->error(1005, '编辑失败');
+                    return $this->error(1005, '删除失败');
                 }
             } else {
                 //初始化asset_sell
@@ -84,12 +84,12 @@ class actionDelete extends \MyAPP\Controller\Api
                 }
                 $rs = $dbTransDetail->transSellDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {
-                    return $this->error(1006, '编辑失败');
+                    return $this->error(1006, '删除失败');
                 }
             }
 
             return $this->success([
-                'msg' => '买入成功'
+                'msg' => '删除成功'
             ]);
         }
     }
