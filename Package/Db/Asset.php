@@ -18,9 +18,17 @@ class Asset extends Db
         return $this->query($sql, $param);
     }
 
-    public function getList($param, $field = '*', $order = '', $limit = 20)
+    public function getList($param, $field = '*', $order = '', $limit = 0)
     {
         $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id = :user_id';
+        if (!empty($order)) $sql .= ' ORDER BY ' . $order;
+        if (!empty($limit)) $sql .= ' LIMIT ' . $limit;
+        return $this->queryAll($sql, $param);
+    }
+
+    public function getHistory($param, $field = '*', $order = '', $limit = 0)
+    {
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id = :user_id AND number = 0';
         if (!empty($order)) $sql .= ' ORDER BY ' . $order;
         if (!empty($limit)) $sql .= ' LIMIT ' . $limit;
         return $this->queryAll($sql, $param);
