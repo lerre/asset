@@ -58,10 +58,7 @@ class actionConnect extends \MyAPP\Controller\Api
             $ip = $this->getIp();
 
             $dbUser = new User();
-            $param = [
-                'openid' => $openId
-            ];
-            $user = $dbUser->getLine($param, 'id,login_times');
+            $user = $dbUser->checkExist($openId, 'id,login_times');
             if (empty($user['id'])) {
                 $data['reg_time'] = $today;
                 $data['last_login_time'] = $today;

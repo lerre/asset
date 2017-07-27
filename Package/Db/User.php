@@ -30,8 +30,14 @@ class User extends Db
 
     public function getLine($param, $field)
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE open_id = :openid';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE id = :id';
         return $this->query($sql, $param);
+    }
+
+    public function checkExist($openId, $field)
+    {
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE open_id = ' . $openId . ' LIMIT 1';
+        return $this->query($sql);
     }
 
     public function register($data)
