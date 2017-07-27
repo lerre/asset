@@ -67,18 +67,26 @@ class actionUpdate extends \MyAPP\Controller\Api
 
             $dbTransDetail = new TransDetail();
             $param = [
+                'id' => $id,
                 'user_id' => $userId,
                 'coin_id' => $coinId,
                 'type' => $type
             ];
-            $rsTransDetail = $dbTransDetail->getLine($param, 'number,price,place,cost');
+            $rsTransDetail = $dbTransDetail->getById($param, 'number,price,place,cost');
             if (empty($rsTransDetail)) {
                 return $this->error(1003, '交易记录不存在');
             }
 
-            $rs = $dbTransDetail->transUpdate($userId, $coinId, $number, $price, $rsTransDetail);
-            if (empty($rs)) {
-                return $this->error(1003, '编辑失败');
+            if ($type == self::TYPE_BUY) {
+                $rs = $dbTransDetail->transBuyUpdate($userId, $coinId, $number, $price, $id, $rsTransDetail);
+                if (empty($rs)) {
+                    return $this->error(1004, '编辑失败');
+                }
+            } else {
+                $rs = $dbTransDetail->transSellUpdate($userId, $coinId, $number, $price, $id, $rsTransDetail);
+                if (empty($rs)) {
+                    return $this->error(1005, '编辑失败');
+                }
             }
 
             return $this->success([

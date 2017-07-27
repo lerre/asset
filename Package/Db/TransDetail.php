@@ -53,6 +53,11 @@ class TransDetail extends Db
         return $this->insert($this->tableName, $data);
     }
 
+    public function updateTransDetail($data, $where, $whereParam)
+    {
+        return $this->update($this->tableName, $data, $where, $whereParam);
+    }
+
     public function deleteTransDetail($id)
     {
         $where = 'id = :id';
@@ -186,16 +191,59 @@ class TransDetail extends Db
         return true;
     }
 
-    public function transUpdate($userId, $coinId, $number, $price, $dataTransDetail)
+    public function transBuyUpdate($userId, $coinId, $number, $price, $id, $dataTransDetail)
+    {
+        $currDate = date('Y-m-d H:i:s');
+
+        //当时持币成本单价
+        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
+        //$oldPrice = isset($dataTransDetail['price']) ? (float)$dataTransDetail['price'] : 0.00;
+
+        //持币成本差价
+        $costProfit = ($number - $dataTransDetail['number']) * $cost;
+
+        try {
+            $this->beginTransaction();
+
+            $data = [
+                'number' => $number,
+                'price' => $price,
+                'update_at' => $currDate
+            ];
+            $where = 'id = :id';
+            $whereParam = [
+                'id' => $id,
+            ];
+            $res = $this->updateTransDetail($data, $where, $whereParam);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->incrAsset($userId, $coinId, $number, $costProfit);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $this->commit();
+            $this->endTransaction();
+        } catch (\PDOException $e) {
+            $this->rollback();
+            $this->endTransaction();
+            return false;
+        }
+
+        return true;
+    }
+
+    public function transSellUpdate($userId, $coinId, $number, $price, $id, $dataTransDetail)
     {
         $currDate = date('Y-m-d H:i:s');
 
         //当时持币成本单价
         $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
         $oldPrice = isset($dataTransDetail['price']) ? (float)$dataTransDetail['price'] : 0.00;
-
-        //持币成本差价
-        $costProfit = ($number - $dataTransDetail['number']) * $cost;
 
         //卖出盈亏差价
         $sellProfit = $number * ($price - $cost) - $dataTransDetail['number'] * ($oldPrice - $cost);
@@ -208,13 +256,11 @@ class TransDetail extends Db
                 'price' => $price,
                 'update_at' => $currDate
             ];
-            $res = $this->insertTransDetail($data);
-            if (empty($res)) {
-                $this->rollback();
-                return false;
-            }
-
-            $res = $this->incrAsset($userId, $coinId, $number, $costProfit);
+            $where = 'id = :id';
+            $whereParam = [
+                'id' => $id,
+            ];
+            $res = $this->updateTransDetail($data, $where, $whereParam);
             if (empty($res)) {
                 $this->rollback();
                 return false;
