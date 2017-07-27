@@ -47,6 +47,13 @@ class TransDetail extends Db
         return $this->insert($this->tableName, $data);
     }
 
+    public function deleteTransDetail($id)
+    {
+        $where = 'id = :id';
+        $whereParam = ['id' => $id];
+        return $this->delete($this->tableName, $where, $whereParam);
+    }
+
     private function incrAsset($userId, $coinId, $number, $profit)
     {
         $currDate = date('Y-m-d H:i:s');
@@ -65,6 +72,13 @@ class TransDetail extends Db
     {
         $currDate = date('Y-m-d H:i:s');
         $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET profit=profit+' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        return $this->exec('UPDATE', $sql);
+    }
+
+    private function decrAssetSell($userId, $coinId, $profit)
+    {
+        $currDate = date('Y-m-d H:i:s');
+        $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET profit=profit-' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
@@ -217,9 +231,82 @@ class TransDetail extends Db
         return true;
     }
 
-    public function transDelete($userId, $coinId, $number, $price, $cost)
+    /**
+     * 买入删除
+     * @param $userId
+     * @param $coinId
+     * @param $id
+     * @param $dataTransDetail
+     * @return bool
+     */
+    public function transBuyDelete($userId, $coinId, $id, $dataTransDetail)
     {
+        //当时持币成本单价
+        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
+        $number = $dataTransDetail['number'] ? (int)$dataTransDetail['number'] : 0;
 
+        //持币成本差价
+        $costProfit = $dataTransDetail['number'] * $cost;
+
+        try {
+            $this->beginTransaction();
+
+            $res = $this->deleteTransDetail($id);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->decrAsset($userId, $coinId, $number, $costProfit);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $this->commit();
+            $this->endTransaction();
+        } catch (\PDOException $e) {
+            $this->rollback();
+            $this->endTransaction();
+            return false;
+        }
+
+        return true;
+    }
+
+    public function transSellDelete($userId, $coinId, $id, $dataTransDetail)
+    {
+        //当时持币成本单价
+        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
+        $oldPrice = isset($dataTransDetail['price']) ? (float)$dataTransDetail['price'] : 0.00;
+
+        //卖出盈亏差价
+        $sellProfit = $dataTransDetail['number'] * ($oldPrice - $cost);
+
+        try {
+            $this->beginTransaction();
+
+            $res = $this->deleteTransDetail($id);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->decrAssetSell($userId, $coinId, $sellProfit);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $this->commit();
+            $this->endTransaction();
+        } catch (\PDOException $e) {
+            $this->rollback();
+            $this->endTransaction();
+            return false;
+        }
+
+        return true;
     }
 
     public function deleteAll($userId, $coinId)
