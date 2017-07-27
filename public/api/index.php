@@ -13,7 +13,7 @@ define('CONTROLLER_PREFIX', '\MyAPP\Controller\Api');
 ini_set('display_errors', 1);
 date_default_timezone_set('PRC');
 
-//require_once MyAPP_ROOT . '/utils/WxSpAes/WxSpAes.php';
+require_once MyAPP_ROOT . '/utils/WxSpAes/WxSpAes.php';
 require_once MyPHP_ROOT . '/My.php';
 
 $MyApp = new My\Application();
