@@ -48,8 +48,8 @@ class Asset extends Db
     {
         $where = 'user_id = :user_id And coin_id = :coin_id';
         $whereParam = [
-            ':user_id' => $userId,
-            ':coin_id' => $coinId
+            'user_id' => $userId,
+            'coin_id' => $coinId
         ];
         return $this->delete($this->tableName, $where, $whereParam);
     }

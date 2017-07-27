@@ -22,7 +22,9 @@ class actionDelete extends \MyAPP\Controller\Api
                 $this->error(1001, '用户未登录');
             }
             $userId = $this->userId;
-            $coinId = $this->request->getRequest()->string('coin_id');
+
+            $raw = $this->request->getRaw();
+            $coinId = isset($raw['coin_id']) ? $raw['coin_id'] : '';
 
             $dbAsset = new Asset();
             $dbAsset->deleteAll($userId, $coinId);

@@ -35,7 +35,7 @@ class TransCount extends Db
     {
         $where = 'user_id = :user_id';
         $whereParam = [
-            ':user_id' => $userId
+            'user_id' => $userId
         ];
         return $this->delete($this->tableName, $where, $whereParam);
     }
