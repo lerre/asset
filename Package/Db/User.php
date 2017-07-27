@@ -36,7 +36,7 @@ class User extends Db
 
     public function checkExist($openId, $field)
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE open_id = ' . $openId . ' LIMIT 1';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE openid = ' . $openId . ' LIMIT 1';
         return $this->query($sql);
     }
 
