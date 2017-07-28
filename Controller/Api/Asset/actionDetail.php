@@ -143,6 +143,7 @@ class actionDetail extends \MyAPP\Controller\Api
         $dbTransDetail = new TransDetail();
         $rsTransDetail = $dbTransDetail->getPaginationList($userId, $maxId, 'id,type,coin_id,number,price,create_at', $pageSize);
 
+        $idArr = [];
         $assetTransList = [];
         $assetTransSellList = [];
         if (!empty($rsTransDetail)) {
@@ -175,7 +176,9 @@ class actionDetail extends \MyAPP\Controller\Api
 
         $output['asset_place_list'] = $assetPlaceList;
         $output['asset_trans_list'] = $assetTransList;
-        $output['min_id'] = min($idArr);
+        if (!empty($idArr)) {
+            $output['min_id'] = min($idArr);
+        }
 
         $this->success($output);
     }
