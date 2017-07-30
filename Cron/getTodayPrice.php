@@ -71,6 +71,8 @@ function curl($url = '', $type = 'GET', $fields = [], $headers = [], $timeout = 
  */
 $db = new Db();
 
+$date = date('Y-m-d', strtotime('+1 day'));
+
 $values = '';
 
 $sql = 'SELECT coin_id FROM currency';
