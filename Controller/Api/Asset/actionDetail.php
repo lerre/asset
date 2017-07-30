@@ -34,12 +34,14 @@ class actionDetail extends \MyAPP\Controller\Api
 
         //币种
         $coinIdList = [];
+        $coinIdIndex = [];
 
         $dbCurrency = new Currency();
-        $data = $dbCurrency->getList('coin_id');
+        $data = $dbCurrency->getList('coin_id,coin');
         if (!empty($data)) {
             foreach ($data as $k => $v) {
                 $coinIdList[] = $v['coin_id'];
+                $coinIdIndex[$v['coin_id']] = $v['coin'];
             }
         }
 
@@ -164,6 +166,7 @@ class actionDetail extends \MyAPP\Controller\Api
                         break;
                 }
                 $assetTransList[$k]['coin_id'] = !empty($v['coin_id']) ? $v['coin_id'] : '';
+                $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
                 $assetTransList[$k]['number'] = !empty($v['number']) ? (int)$v['number'] : 0;
                 $assetTransList[$k]['price'] = !empty($v['price']) ? (float)$v['price'] : 0.00;
                 $assetTransList[$k]['sum'] = round($assetTransList[$k]['number'] * $assetTransList[$k]['price'], 2);

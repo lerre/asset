@@ -19,12 +19,14 @@ class actionList extends \MyAPP\Controller\Api
 
         //币种
         $coinIdList = [];
+        $coinIdIndex = [];
 
         $dbCurrency = new Currency();
-        $data = $dbCurrency->getList('coin_id');
+        $data = $dbCurrency->getList('coin_id,coin');
         if (!empty($data)) {
             foreach ($data as $k => $v) {
                 $coinIdList[] = $v['coin_id'];
+                $coinIdIndex[$v['coin_id']] = $v['coin'];
             }
         }
 
@@ -70,6 +72,7 @@ class actionList extends \MyAPP\Controller\Api
                 if (!in_array($coinId, $coinIdList)) { //未收录
                     $assetList[$k]['included'] = false;
                     $assetList[$k]['coin_id'] = $coinId; //币种
+                    $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
                     $assetList[$k]['price'] = '暂未收录'; //最新价
                     $assetList[$k]['cost'] = '暂未收录'; //成本价
                     $assetList[$k]['worth'] = '暂未收录'; //市值
@@ -92,6 +95,7 @@ class actionList extends \MyAPP\Controller\Api
                 $pastPrice = $this->getPastPrice($coinId); //凌晨价格
                 if ($coinId && $number) {
                     $assetList[$k]['coin_id'] = $coinId; //币种
+                    $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
                     $assetList[$k]['price'] = $price; //最新价
                     $assetList[$k]['cost'] = $cost; //成本价
                     $assetList[$k]['worth'] = $this->getDecimal($price * $number); //市值
