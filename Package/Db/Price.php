@@ -17,4 +17,9 @@ class Price extends Db
         $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE date = :date AND coin_id = :coin_id';
         return $this->query($sql, $param);
     }
+
+    public function insertPrice($data)
+    {
+        return $this->insert($this->tableName, $data, 'ignore');
+    }
 }
