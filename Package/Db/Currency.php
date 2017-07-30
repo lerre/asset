@@ -12,10 +12,10 @@ class Currency extends Db
     protected $databaseName = 'asset';
     protected $tableName = 'currency';
 
-    public function getList($param, $field = '*')
+    public function getList($field = '*')
     {
         $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName;
-        return $this->queryAll($sql, $param);
+        return $this->queryAll($sql);
     }
 
     public function insertCurrency($data)

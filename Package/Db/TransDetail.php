@@ -35,15 +35,16 @@ class TransDetail extends Db
         return $this->queryAll($sql, $param);
     }
 
-    public function getPaginationList($userId, $maxId, $field = '*', $limit = 20)
+    public function getPaginationList($userId, $coinId, $maxId, $field = '*', $limit = 20)
     {
         $param['user_id'] = $userId;
+        $param['coin_id'] = $coinId;
         $sqlAppend = '';
         if (!empty($maxId)) {
             $param['id'] = $maxId;
             $sqlAppend = 'AND id<:id';
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id=:user_id ' . $sqlAppend . ' ORDER BY id DESC';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id = :user_id AND coin_id = :coin_id ' . $sqlAppend . ' ORDER BY id DESC';
         if (!empty($limit)) $sql .= ' LIMIT ' . $limit;
         return $this->queryAll($sql, $param);
     }

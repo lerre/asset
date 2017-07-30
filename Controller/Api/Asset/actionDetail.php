@@ -6,6 +6,7 @@ use MyApp\Package\Db\Asset;
 use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\AssetPlace;
 use MyApp\Package\Db\Currency;
+use MyApp\Package\Db\Price;
 use MyApp\Package\Db\TransDetail;
 
 class actionDetail extends \MyAPP\Controller\Api
@@ -69,9 +70,9 @@ class actionDetail extends \MyAPP\Controller\Api
         //持币总值: 当前价*持币数
         $worth = round($price * $number, 2);
 
-        //当日盈亏 TODO 昨日凌晨价格
-        $pastPrice = $this->getPastPrice($coinId);
-        $currProfile = $this->getDecimal(($price - $pastPrice) * $number);
+        //当日盈亏
+        $todayPrice = $this->getTodayPrice($coinId); //凌晨价格
+        $currProfile = $this->getDecimal(($price - $todayPrice) * $number);
 
         //持仓盈亏
         $holdProfile = $this->getDecimal(($price - $cost) * $number, 2);
@@ -143,7 +144,7 @@ class actionDetail extends \MyAPP\Controller\Api
 
         //交易记录
         $dbTransDetail = new TransDetail();
-        $rsTransDetail = $dbTransDetail->getPaginationList($userId, $maxId, 'id,type,coin_id,number,price,create_at', $pageSize);
+        $rsTransDetail = $dbTransDetail->getPaginationList($userId, $coinId, $maxId, 'id,type,coin_id,number,price,create_at', $pageSize);
 
         $idArr = [];
         $assetTransList = [];
@@ -186,8 +187,14 @@ class actionDetail extends \MyAPP\Controller\Api
         $this->success($output);
     }
 
-    private function getPastPrice($coinId)
+    private function getTodayPrice($coinId)
     {
-        return mt_rand(100, 100000);
+        $dbPrice = new Price();
+        $param = [
+            'date' => date('Y-m-d'),
+            'coin_id' => $coinId
+        ];
+        $rs = $dbPrice->getLine($param, 'price');
+        return isset($rs['price']) ? (float)$rs['price'] : 0.00;
     }
 }

@@ -5,6 +5,7 @@ namespace MyAPP\Controller\Api\Asset;
 use MyApp\Package\Db\Asset;
 use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\Currency;
+use MyApp\Package\Db\Price;
 
 class actionList extends \MyAPP\Controller\Api
 {
@@ -76,8 +77,8 @@ class actionList extends \MyAPP\Controller\Api
                     $assetList[$k]['price'] = '暂未收录'; //最新价
                     $assetList[$k]['cost'] = '暂未收录'; //成本价
                     $assetList[$k]['worth'] = '暂未收录'; //市值
-                    //$assetList[$k]['curr_profit'] = '暂未收录';
-                    //$assetList[$k]['hold_profit'] = '暂未收录';
+                    $assetList[$k]['curr_profit'] = '暂未收录';
+                    $assetList[$k]['hold_profit'] = '暂未收录';
                     $assetList[$k]['accumulated_profile'] = '暂未收录';
                     $assetList[$k]['accumulated_profile_rate'] = '暂未收录';
                     continue;
@@ -92,7 +93,7 @@ class actionList extends \MyAPP\Controller\Api
                     $profit = round($profit * $number, 2); //持币成本
                 }
                 $price = $this->getPrice($coinId); //当前价格
-                $pastPrice = $this->getPastPrice($coinId); //凌晨价格
+                $todayPrice = $this->getTodayPrice($coinId); //凌晨价格
                 if ($coinId && $number) {
                     $assetList[$k]['coin_id'] = $coinId; //币种
                     $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
@@ -101,8 +102,8 @@ class actionList extends \MyAPP\Controller\Api
                     $assetList[$k]['worth'] = $this->getDecimal($price * $number); //市值
                     $worth += $assetList[$k]['worth'];
                     //当日盈亏
-                    //$assetList[$k]['curr_profit'] = ($price - $pastPrice) * $number;
-                    $currProfit += ($price - $pastPrice) * $number;
+                    //$assetList[$k]['curr_profit'] = ($price - $todayPrice) * $number;
+                    $currProfit += $this->getDecimal(($price - $todayPrice) * $number);
                     //持币成本
                     $costProfit += $profit;
                     //持币盈亏
@@ -133,8 +134,14 @@ class actionList extends \MyAPP\Controller\Api
         $this->success($output);
     }
 
-    private function getPastPrice($coinId)
+    private function getTodayPrice($coinId)
     {
-        return mt_rand(100, 100000);
+        $dbPrice = new Price();
+        $param = [
+            'date' => date('Y-m-d'),
+            'coin_id' => $coinId
+        ];
+        $rs = $dbPrice->getLine($param, 'price');
+        return isset($rs['price']) ? (float)$rs['price'] : 0.00;
     }
 }
