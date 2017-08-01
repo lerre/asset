@@ -59,7 +59,6 @@ class actionList extends \MyAPP\Controller\Api
 
         $assetList = [];
         $worth = 0;
-        $currProfit = 0.00;
         $costProfit = 0.00;
         $holdProfit = 0.00;
 
@@ -74,26 +73,16 @@ class actionList extends \MyAPP\Controller\Api
                     $assetList[$k]['included'] = false;
                     $assetList[$k]['coin_id'] = $coinId; //币种
                     $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
-                    $assetList[$k]['price'] = '暂未收录'; //最新价
-                    $assetList[$k]['cost'] = '暂未收录'; //成本价
-                    $assetList[$k]['worth'] = '暂未收录'; //市值
-                    $assetList[$k]['curr_profit'] = '暂未收录';
-                    $assetList[$k]['hold_profit'] = '暂未收录';
-                    $assetList[$k]['accumulated_profile'] = '暂未收录';
-                    $assetList[$k]['accumulated_profile_rate'] = '暂未收录';
                     continue;
                 } else {
                     $assetList[$k]['included'] = true;
                 }
                 $profit = !empty($v['profit']) ? (float)$v['profit'] : 0.00;
                 $cost = !empty($v['cost']) ? (float)$v['cost'] : 0.00;
-                if ($cost == 0.00) {
+                if ($cost <= 0.00) {
                     $cost = round($profit / $number, 2); //持币成本单价
-                } else {
-                    $profit = round($profit * $number, 2); //持币成本
                 }
                 $price = $this->getPrice($coinId); //当前价格
-                $todayPrice = $this->getTodayPrice($coinId); //凌晨价格
                 if ($coinId && $number) {
                     $assetList[$k]['coin_id'] = $coinId; //币种
                     $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
@@ -101,14 +90,13 @@ class actionList extends \MyAPP\Controller\Api
                     $assetList[$k]['cost'] = $cost; //成本价
                     $assetList[$k]['worth'] = $this->getDecimal($price * $number); //市值
                     $worth += $assetList[$k]['worth'];
-                    //当日盈亏
-                    //$assetList[$k]['curr_profit'] = ($price - $todayPrice) * $number;
-                    $currProfit += $this->getDecimal(($price - $todayPrice) * $number);
-                    //持币成本
+                    //持仓成本
                     $costProfit += $profit;
-                    //持币盈亏
-                    //$assetList[$k]['hold_profit'] = ($price - $cost) * $number;
+                    //持仓盈亏
+                    $assetList[$k]['hold_profit'] = ($price - $cost) * $number;
                     $holdProfit += ($price - $cost) * $number;
+                    //持仓盈亏率
+                    $assetList[$k]['hold_profit_rate'] = !empty($profit) ? $this->getDecimal($assetList[$k]['hold_profit'] / $profit) : 0;
                     //累计盈亏
                     if (isset($assetSellList[$coinId])) {
                         $assetList[$k]['accumulated_profile'] = $holdProfit + $assetSellList[$coinId];
@@ -116,32 +104,23 @@ class actionList extends \MyAPP\Controller\Api
                         $assetList[$k]['accumulated_profile'] = $holdProfit;
                     }
                     //累积盈亏率
-                    $assetList[$k]['accumulated_profile_rate'] = !empty($profit) ? $this->getDecimal(($assetList[$k]['accumulated_profile'] - $profit) / $profit) : 0;
+                    $assetList[$k]['accumulated_profile_rate'] = !empty($profit) ? $this->getDecimal($assetList[$k]['accumulated_profile'] / $profit) : 0;
                 }
             }
         }
 
-        $accumulatedProfit = $holdProfit + $sellProfit;
+        //累计盈亏
+        $accumulatedProfit = $worth + $sellProfit - $costProfit;
 
         $output['user_id'] = $userId;
         $output['worth'] = $worth;
-        $output['curr_profit'] = $currProfit;
-        $output['hold_profit'] = $holdProfit;
-        $output['accumulated_profit'] = $accumulatedProfit;
-        $output['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal(($accumulatedProfit - $costProfit) / $costProfit) : 0;
+        $output['cost_profit'] = $costProfit; //持仓成本
+        $output['hold_profit'] = $holdProfit; //持仓盈亏
+        $output['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit) : 0; //持仓盈亏率
+        $output['accumulated_profit'] = $accumulatedProfit; //累计盈亏
+        $output['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0; //累计盈亏率
         $output['list'] = array_values($assetList);
 
         $this->success($output);
-    }
-
-    private function getTodayPrice($coinId)
-    {
-        $dbPrice = new Price();
-        $param = [
-            'date' => date('Y-m-d'),
-            'coin_id' => $coinId
-        ];
-        $rs = $dbPrice->getLine($param, 'price');
-        return isset($rs['price']) ? (float)$rs['price'] : 0.00;
     }
 }

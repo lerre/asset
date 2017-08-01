@@ -66,40 +66,37 @@ class TransDetail extends Db
         return $this->delete($this->tableName, $where, $whereParam);
     }
 
-    private function incrAsset($userId, $coinId, $number, $profit)
+    private function incrAsset($userId, $coinId, $number, $profit = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
         $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number+' . $number . ',profit=profit+' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    private function decrAsset($userId, $coinId, $number, $profit)
+    private function decrAsset($userId, $coinId, $number, $profit = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
         $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number-' . $number . ',profit=profit-' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    private function incrAssetSell($userId, $coinId, $profit)
+    private function incrAssetSell($userId, $coinId, $profit = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
         $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET profit=profit+' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    private function decrAssetSell($userId, $coinId, $profit)
+    private function decrAssetSell($userId, $coinId, $profit = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
         $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET profit=profit-' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    public function buy($userId, $date, $coinId, $number, $price, $place, $cost)
+    public function buy($userId, $date, $coinId, $number, $price, $place)
     {
         $currDate = date('Y-m-d H:i:s');
-
-        //持币成本增量
-        $costProfit = $cost > 0.00 ? $number * $cost : $number * $price;
 
         try {
             $this->beginTransaction();
@@ -112,7 +109,6 @@ class TransDetail extends Db
                 'number' => $number,
                 'price' => $price,
                 'place' => $place,
-                'cost' => $cost,
                 'create_at' => $currDate,
                 'update_at' => $currDate
             ];
@@ -122,7 +118,7 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->incrAsset($userId, $coinId, $number, $costProfit);
+            $res = $this->incrAsset($userId, $coinId, $number, $number * $price);
             if (empty($res)) {
                 $this->rollback();
                 return false;
@@ -139,15 +135,11 @@ class TransDetail extends Db
         return true;
     }
 
-    public function sell($userId, $date, $coinId, $number, $price, $cost)
+    public function sell($userId, $date, $coinId, $number, $price)
     {
         $currDate = date('Y-m-d H:i:s');
 
-        //持币成本减量
-        $costProfit = $number * $cost;
-
-        //卖出盈亏增量
-        $sellProfit = $number * ($price - $cost);
+        $profit = $number * $price;
 
         try {
             $this->beginTransaction();
@@ -159,7 +151,6 @@ class TransDetail extends Db
                 'coin_id' => $coinId,
                 'number' => $number,
                 'price' => $price,
-                'cost' => $cost,
                 'create_at' => $currDate,
                 'update_at' => $currDate
             ];
@@ -169,13 +160,13 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->decrAsset($userId, $coinId, $number, $costProfit);
+            $res = $this->incrAssetSell($userId, $coinId, $profit);
             if (empty($res)) {
                 $this->rollback();
                 return false;
             }
 
-            $res = $this->incrAssetSell($userId, $coinId, $sellProfit);
+            $res = $this->decrAsset($userId, $coinId, $number);
             if (empty($res)) {
                 $this->rollback();
                 return false;
@@ -196,12 +187,8 @@ class TransDetail extends Db
     {
         $currDate = date('Y-m-d H:i:s');
 
-        //当时持币成本单价
-        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
-        //$oldPrice = isset($dataTransDetail['price']) ? (float)$dataTransDetail['price'] : 0.00;
-
-        //持币成本差价
-        $costProfit = ($number - $dataTransDetail['number']) * $cost;
+        $numberDiff = $number - $dataTransDetail['number'];
+        $profitDiff = $number * $price - $dataTransDetail['number'] * $dataTransDetail['price'];
 
         try {
             $this->beginTransaction();
@@ -221,7 +208,7 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->incrAsset($userId, $coinId, $number, $costProfit);
+            $res = $this->incrAsset($userId, $coinId, $numberDiff, $profitDiff);
             if (empty($res)) {
                 $this->rollback();
                 return false;
@@ -242,12 +229,8 @@ class TransDetail extends Db
     {
         $currDate = date('Y-m-d H:i:s');
 
-        //当时持币成本单价
-        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
-        $oldPrice = isset($dataTransDetail['price']) ? (float)$dataTransDetail['price'] : 0.00;
-
-        //卖出盈亏差价
-        $sellProfit = $number * ($price - $cost) - $dataTransDetail['number'] * ($oldPrice - $cost);
+        $numberDiff = $number - $dataTransDetail['number'];
+        $profitDiff = $number * $price - $dataTransDetail['number'] * $dataTransDetail['price'];
 
         try {
             $this->beginTransaction();
@@ -267,7 +250,13 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->incrAssetSell($userId, $coinId, $sellProfit);
+            $res = $this->incrAssetSell($userId, $coinId, $profitDiff);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->decrAsset($userId, $coinId, $numberDiff);
             if (empty($res)) {
                 $this->rollback();
                 return false;
@@ -294,12 +283,8 @@ class TransDetail extends Db
      */
     public function transBuyDelete($userId, $coinId, $id, $dataTransDetail)
     {
-        //当时持币成本单价
-        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
-        $number = $dataTransDetail['number'] ? (int)$dataTransDetail['number'] : 0;
-
-        //持币成本差价
-        $costProfit = $dataTransDetail['number'] * $cost;
+        $number = $dataTransDetail['number'];
+        $profit = $dataTransDetail['number'] * $dataTransDetail['price'];
 
         try {
             $this->beginTransaction();
@@ -310,7 +295,7 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->decrAsset($userId, $coinId, $number, $costProfit);
+            $res = $this->decrAsset($userId, $coinId, $number, $profit);
             if (empty($res)) {
                 $this->rollback();
                 return false;
@@ -327,14 +312,18 @@ class TransDetail extends Db
         return true;
     }
 
+    /**
+     * 卖出删除
+     * @param $userId
+     * @param $coinId
+     * @param $id
+     * @param $dataTransDetail
+     * @return bool
+     */
     public function transSellDelete($userId, $coinId, $id, $dataTransDetail)
     {
-        //当时持币成本单价
-        $cost = isset($dataTransDetail['cost']) ? (float)$dataTransDetail['cost'] : 0.00;
-        $oldPrice = isset($dataTransDetail['price']) ? (float)$dataTransDetail['price'] : 0.00;
-
-        //卖出盈亏差价
-        $sellProfit = $dataTransDetail['number'] * ($oldPrice - $cost);
+        $numberDiff = $dataTransDetail['number'];
+        $profitDiff = $dataTransDetail['number'] * $dataTransDetail['price'];
 
         try {
             $this->beginTransaction();
@@ -345,7 +334,13 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->decrAssetSell($userId, $coinId, $sellProfit);
+            $res = $this->decrAssetSell($userId, $coinId, $profitDiff);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->incrAsset($userId, $coinId, $numberDiff);
             if (empty($res)) {
                 $this->rollback();
                 return false;

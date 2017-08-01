@@ -68,7 +68,7 @@ class actionSell extends \MyAPP\Controller\Api
             }
 
             $dbTransDetail = new TransDetail();
-            $res = $dbTransDetail->sell($userId, $date, $coinId, $number, $price, $cost);
+            $res = $dbTransDetail->sell($userId, $date, $coinId, $number, $price);
             if (empty($res)) {
                 return $this->error(1004, '卖出失败');
             }
