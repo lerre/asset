@@ -78,6 +78,21 @@ class actionBuy extends \MyAPP\Controller\Api
             //交易计数+1
             $dbTransCount->incrTransCount($userId);
 
+            //更新成本均价
+            $res = $dbAsset->getLine($param, 'number,cost');
+            if (!empty($res) && $res['cost'] != 0.00) {
+                $cost = !empty($res['number']) ? $this->getDecimal($res['profit'] / $res['number']) : 0.00;
+                $data = [
+                    'cost' => $cost
+                ];
+                $where = 'user_id=:user_id AND coin_id=:coin_id';
+                $whereParam = [
+                    ':user_id' => $userId,
+                    ':coin_id' => $coinId
+                ];
+                $dbAsset->updateAsset($data, $where, $whereParam);
+            }
+
             //记录交易来源
             $dbAssetPlace = new AssetPlace();
             $data = [

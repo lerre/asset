@@ -62,8 +62,8 @@ class actionDetail extends \MyAPP\Controller\Api
         //当前价
         $price = $this->getPrice($coinId);
         //成本价
-        if ($cost == 0.00) {
-            $cost = !empty($number) ? round($profit / $number, 2) : 0.00; //持币成本单价
+        if ($cost <= 0.00) {
+            $cost = !empty($number) ? $this->getDecimal($profit / $number) : 0.00; //持币成本单价
         }
         //持币总值: 当前价*持币数
         $worth = round($price * $number, 2);

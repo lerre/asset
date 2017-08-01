@@ -45,12 +45,6 @@ class actionSell extends \MyAPP\Controller\Api
                 return $this->error(1003, '币数不足');
             }
 
-            //持币成本单价
-            $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
-            if ($cost <= 0.00) {
-                $cost = !empty($res['number']) ? (float)$res['profit'] / $res['number'] : 0.00;
-            }
-
             //初始化asset_sell
             $dbAssetSell = new AssetSell();
             $param = [

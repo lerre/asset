@@ -80,7 +80,7 @@ class actionList extends \MyAPP\Controller\Api
                 $profit = !empty($v['profit']) ? (float)$v['profit'] : 0.00;
                 $cost = !empty($v['cost']) ? (float)$v['cost'] : 0.00;
                 if ($cost <= 0.00) {
-                    $cost = round($profit / $number, 2); //持币成本单价
+                    $cost = !empty($number) ? $this->getDecimal($profit / $number) : 0.00; //持币成本单价
                 }
                 $price = $this->getPrice($coinId); //当前价格
                 if ($coinId && $number) {
