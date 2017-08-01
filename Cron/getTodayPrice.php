@@ -71,7 +71,7 @@ function curl($url = '', $type = 'GET', $fields = [], $headers = [], $timeout = 
  */
 $db = new Db();
 
-$date = date('Y-m-d', strtotime('+1 day'));
+$date = date('Y-m-d');
 
 $values = '';
 
@@ -80,7 +80,7 @@ $rsCurrency = $db->queryAll($sql);
 
 if (!empty($rsCurrency)) {
     foreach ($rsCurrency as $k => $v) {
-        echo $k;
+        echo $k . PHP_EOL;
         if (!empty($v['coin_id'])) {
             $coinId = $v['coin_id'];
             $price = getPrice($coinId);
