@@ -69,14 +69,8 @@ class actionBuy extends \MyAPP\Controller\Api
                 ]);
             }
 
-            //持币成本单价
-            $cost = isset($res['cost']) ? (float)$res['cost'] : 0.00;
-            if ($cost <= 0.00) {
-                $cost = !empty($res['number']) ? (float)$res['profit'] / $res['number'] : 0.00;
-            }
-
             $dbTransDetail = new TransDetail();
-            $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place, $cost);
+            $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place);
             if (empty($res)) {
                 return $this->error(1002, '买入失败');
             }

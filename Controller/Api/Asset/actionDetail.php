@@ -64,18 +64,15 @@ class actionDetail extends \MyAPP\Controller\Api
         //成本价
         if ($cost == 0.00) {
             $cost = !empty($number) ? round($profit / $number, 2) : 0.00; //持币成本单价
-        } else {
-            $profit = round($cost * $number, 2); //持币成本
         }
         //持币总值: 当前价*持币数
         $worth = round($price * $number, 2);
 
-        //当日盈亏
-        $todayPrice = $this->getTodayPrice($coinId); //凌晨价格
-        $currProfile = $this->getDecimal(($price - $todayPrice) * $number);
+        //持仓成本
+        $costProfit = $profit;
 
         //持仓盈亏
-        $holdProfile = $this->getDecimal(($price - $cost) * $number, 2);
+        $holdProfit = $this->getDecimal(($price - $cost) * $number, 2);
 
         //累积盈亏
         $dbAssetSell = new AssetSell();
@@ -84,26 +81,23 @@ class actionDetail extends \MyAPP\Controller\Api
             'coin_id' => $coinId
         ];
         $rsAssetSell = $dbAssetSell->getLine($param, 'profit');
-        $sellProfile = isset($rsAssetSell['profit']) ? $rsAssetSell['profit'] : 0.00;
-        $accumulatedProfile = $holdProfile + $sellProfile;
+        $sellProfit = isset($rsAssetSell['profit']) ? $rsAssetSell['profit'] : 0.00;
+        $accumulatedProfit = $worth + $sellProfit - $costProfit;
 
         $output['worth'] = $worth; //持币总值
         $output['price'] = $price; //最新价
         $output['number'] = $number; //持币数
         $output['cost'] = $cost; //成本价
-        $output['curr_profile'] = $currProfile; //当日盈亏
-        $output['hold_profile'] = $holdProfile; //持仓盈亏
-        $output['accumulated_profile'] = $accumulatedProfile; //累积盈亏
+        $output['cost_profit'] = $costProfit; //持仓成本
+        $output['hold_profit'] = $holdProfit; //持仓盈亏
+        $output['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit) : 0; //持仓盈亏率
+        $output['accumulated_profit'] = $accumulatedProfit; //累积盈亏
+        $output['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0; //累计盈亏率
 
         if (!in_array($coinId, $coinIdList)) {
             $output['included'] = false;
-            $output['worth'] = '暂未收录'; //持币总值
-            $output['price'] = '暂未收录'; //最新价
             $output['number'] = $number; //持币数
             $output['cost'] = $cost; //成本价
-            $output['curr_profile'] = '暂未收录'; //当日盈亏
-            $output['hold_profile'] = '暂未收录'; //持仓盈亏
-            $output['accumulated_profile'] = '暂未收录'; //累积盈亏
         } else {
             $output['included'] = true;
         }
@@ -144,7 +138,7 @@ class actionDetail extends \MyAPP\Controller\Api
 
         //交易记录
         $dbTransDetail = new TransDetail();
-        $rsTransDetail = $dbTransDetail->getPaginationList($userId, $coinId, $maxId, 'id,type,coin_id,number,price,create_at', $pageSize);
+        $rsTransDetail = $dbTransDetail->getPaginationList($userId, $coinId, $maxId, 'id,type,coin_id,number,price,date', $pageSize);
 
         $idArr = [];
         $assetTransList = [];
@@ -171,7 +165,7 @@ class actionDetail extends \MyAPP\Controller\Api
                 $assetTransList[$k]['number'] = !empty($v['number']) ? (int)$v['number'] : 0;
                 $assetTransList[$k]['price'] = !empty($v['price']) ? (float)$v['price'] : 0.00;
                 $assetTransList[$k]['sum'] = round($assetTransList[$k]['number'] * $assetTransList[$k]['price'], 2);
-                $assetTransList[$k]['create_at'] = !empty($v['create_at']) ? date('Y-m-d', strtotime($v['create_at'])) : '';
+                $assetTransList[$k]['date'] = !empty($v['date']) ? date('Y-m-d', strtotime($v['date'])) : '';
                 if ($type == self::TYPE_SELL) {
                     $assetTransSellList[$k] = $assetTransList[$k];
                 }

@@ -53,7 +53,7 @@ class actionDelete extends \MyAPP\Controller\Api
                     'user_id' => $userId,
                     'coin_id' => $coinId
                 ];
-                $res = $dbAsset->getLine($param, 'profit,number,cost');
+                $res = $dbAsset->getLine($param, 'id');
                 if (empty($res)) {
                     $dbAsset->insertAsset([
                         'user_id' => $userId,
@@ -73,7 +73,7 @@ class actionDelete extends \MyAPP\Controller\Api
                     'user_id' => $userId,
                     'coin_id' => $coinId
                 ];
-                $res = $dbAssetSell->getLine($param, 'profit');
+                $res = $dbAssetSell->getLine($param, 'id');
                 if (empty($res)) {
                     $dbAssetSell->insertAssetSell([
                         'user_id' => $userId,

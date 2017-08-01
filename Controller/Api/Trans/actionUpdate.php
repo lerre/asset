@@ -72,7 +72,7 @@ class actionUpdate extends \MyAPP\Controller\Api
                 'coin_id' => $coinId,
                 'type' => $type
             ];
-            $rsTransDetail = $dbTransDetail->getById($param, 'number,price,place,cost');
+            $rsTransDetail = $dbTransDetail->getById($param, 'number,price');
             if (empty($rsTransDetail)) {
                 return $this->error(1003, '交易记录不存在');
             }
