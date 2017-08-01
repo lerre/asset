@@ -6,7 +6,6 @@ use MyApp\Package\Db\Asset;
 use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\AssetPlace;
 use MyApp\Package\Db\Currency;
-use MyApp\Package\Db\Price;
 use MyApp\Package\Db\TransDetail;
 
 class actionDetail extends \MyAPP\Controller\Api
@@ -92,7 +91,7 @@ class actionDetail extends \MyAPP\Controller\Api
         $output['hold_profit'] = $holdProfit; //持仓盈亏
         $output['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit) : 0; //持仓盈亏率
         $output['accumulated_profit'] = $accumulatedProfit; //累积盈亏
-        $output['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0; //累计盈亏率
+        $output['accumulated_profit_rate'] = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0; //累计盈亏率
 
         if (!in_array($coinId, $coinIdList)) {
             $output['included'] = false;
@@ -179,16 +178,5 @@ class actionDetail extends \MyAPP\Controller\Api
         }
 
         $this->success($output);
-    }
-
-    private function getTodayPrice($coinId)
-    {
-        $dbPrice = new Price();
-        $param = [
-            'date' => date('Y-m-d'),
-            'coin_id' => $coinId
-        ];
-        $rs = $dbPrice->getLine($param, 'price');
-        return isset($rs['price']) ? (float)$rs['price'] : 0.00;
     }
 }
