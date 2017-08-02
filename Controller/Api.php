@@ -252,7 +252,7 @@ abstract class Api extends Controller
         $API_URL_PRICE = 'http://token114.com/wap/coin/getinfo/%s';
         $priceData = $this->curl(sprintf($API_URL_PRICE, $coinId), 'GET', [], [] ,10);
         $priceData = json_decode($priceData, true);
-        $price = isset($priceData[0]['price_cny']) ? round($priceData[0]['price_cny'], 2) : 0.00;
+        $price = isset($priceData['price_cny']) ? round($priceData['price_cny'], 2) : 0.00;
         if ($price != 0.00) {
             $pool[$coinId] = $price;
         }
