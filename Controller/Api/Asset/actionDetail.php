@@ -103,9 +103,9 @@ class actionDetail extends \MyAPP\Controller\Api
         $output['cost'] = $cost; //成本价
         $output['cost_profit'] = $costProfit; //持仓成本
         $output['hold_profit'] = $holdProfit; //持仓盈亏
-        $output['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit) : 0; //持仓盈亏率
+        $output['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit, 4) : 0; //持仓盈亏率
         $output['accumulated_profit'] = $accumulatedProfit; //累积盈亏
-        $output['accumulated_profit_rate'] = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost) : 0; //累计盈亏率
+        $output['accumulated_profit_rate'] = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost, 4) : 0; //累计盈亏率
 
         if (!in_array($coinId, $coinIdList)) {
             $output['included'] = false;
