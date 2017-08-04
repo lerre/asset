@@ -53,7 +53,7 @@ class actionDelete extends \MyAPP\Controller\Api
                     'user_id' => $userId,
                     'coin_id' => $coinId
                 ];
-                $res = $dbAsset->getLine($param, 'id');
+                $res = $dbAsset->getLine($param, 'id,number');
                 if (empty($res) || $res['number'] < $rsTransDetail['number']) {
                     return $this->error(1005, '币数不足，无法删除');
                 }
