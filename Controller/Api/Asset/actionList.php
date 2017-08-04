@@ -141,6 +141,12 @@ class actionList extends \MyAPP\Controller\Api
                 $accumulatedProfitTotal += $accumulatedProfit;
                 //累积盈亏率
                 $assetList[$k]['accumulated_profit_rate'] = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost, 4) : 0;
+
+                $assetList[$k]['debug'] = [
+                    'hold_profit' => $holdProfit,
+                    'cost_profit' => $costProfit,
+                    'buy_total_cost' => $buyTotalCost,
+                ];
             }
         }
 
