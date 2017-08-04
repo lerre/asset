@@ -20,7 +20,7 @@ class AssetSell extends Db
 
     public function getList($param, $field = '*', $order = '', $limit = 20)
     {
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->tableName . ' WHERE user_id = :user_id';
         if (!empty($order)) $sql .= ' ORDER BY ' . $order;
         if (!empty($limit)) $sql .= ' LIMIT ' . $limit;
         return $this->queryAll($sql, $param);

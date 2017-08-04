@@ -108,6 +108,10 @@ class actionList extends \MyAPP\Controller\Api
                 if ($cost == 0.00) {
                     $cost = !empty($buyTotalNumber) ? $this->getDecimal($buyTotalCost / $buyTotalNumber) : 0.00;
                 }
+
+                $assetList[$k]['cost'] = $cost;
+                $assetList[$k]['cost'] = $cost;
+
                 $assetList[$k]['cost'] = $cost; //持仓数
                 //最新价
                 $price = $this->getPrice($coinId);
@@ -120,7 +124,7 @@ class actionList extends \MyAPP\Controller\Api
                 //买入总成本
                 $buyTotalCostTotal += $buyTotalCost;
                 //持仓成本 = 持仓成本单价 * 持仓数
-                $costProfit = $this->getDecimal($number * $cost);
+                $costProfit = $this->getDecimal($cost * $number);
                 //持仓总成本
                 $costProfitTotal += $costProfit;
                 //持仓盈亏 = (最新价 - 持仓成本单价) * 持仓数
