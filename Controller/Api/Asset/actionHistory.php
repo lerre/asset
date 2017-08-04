@@ -2,18 +2,13 @@
 
 namespace MyAPP\Controller\Api\Asset;
 
-use MyAPP\Package\Db\AssetSell;
+use MyAPP\Package\Db\AssetHistory;
 use MyApp\Package\Db\Currency;
 
 class actionHistory extends \MyAPP\Controller\Api
 {
     public function main()
     {
-        $dbAssetSell = new AssetSell();
-        $res = $dbAssetSell->deleteAll(5, 'zero');
-        var_dump($res);exit;
-
-
         if (empty($this->userId)) {
             $this->error(1001, '用户未登录');
         }
