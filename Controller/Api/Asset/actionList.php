@@ -86,7 +86,7 @@ class actionList extends \MyAPP\Controller\Api
                 }
                 $buyTotalCost = $assetBuyList[$coinId]['total_cost'];
                 $buyTotalNumber = $assetBuyList[$coinId]['number'];
-                $sellTotalProfit = isset($assetSellList[$coinId]) ? $assetSellList[$coinId]['total_profit'] : 0.00;
+                $sellTotalProfit = isset($assetSellList[$coinId]['total_profit']) ? $assetSellList[$coinId]['total_profit'] : 0.00;
 
                 //是否清仓？若已清仓，则不展示
                 if ($number <= 0) {
