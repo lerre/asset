@@ -58,7 +58,7 @@ class actionList extends \MyAPP\Controller\Api
             foreach ($rsAssetSell as $k => $v) {
                 if (empty($v['coin_id'])) continue;
                 $assetSellList[$v['coin_id']]['number'] = isset($v['number']) ? (int)$v['number'] : 0;
-                $assetSellList[$v['coin_id']]['total_profit'] = isset($v['total_cost']) ? (float)$v['total_cost'] : 0.00;
+                $assetSellList[$v['coin_id']]['total_profit'] = isset($v['total_profit']) ? (float)$v['total_profit'] : 0.00;
                 $assetSellTotalProfit += $v['total_profit'];
             }
         }
