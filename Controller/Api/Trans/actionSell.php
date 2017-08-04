@@ -81,7 +81,8 @@ class actionSell extends \MyAPP\Controller\Api
                 $worth = ($rsAsset['number'] - $number) * $currPrice;
                 $sellTotalProfit = $rsAssetSell['total_profit'] + $number * $price;
                 //持币成本单价
-                if (isset($rsAsset['cost']) && (float)$rsAsset['cost']) {
+                $cost = isset($rsAsset['cost']) ? (float)$rsAsset['cost'] : 0;
+                if (empty($cost)) {
                     $cost = !empty($buyNumber) ? $this->getDecimal($buyTotalCost / $buyNumber) : 0.00;
                 }
                 //累积盈亏
