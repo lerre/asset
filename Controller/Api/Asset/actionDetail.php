@@ -3,6 +3,7 @@
 namespace MyAPP\Controller\Api\Asset;
 
 use MyApp\Package\Db\Asset;
+use MyApp\Package\Db\AssetBuy;
 use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\AssetPlace;
 use MyApp\Package\Db\Currency;
@@ -45,45 +46,58 @@ class actionDetail extends \MyAPP\Controller\Api
             }
         }
 
+        $param = [
+            'user_id' => $userId,
+            'coin_id' => $coinId
+        ];
+
+        //持仓数和持仓成本单价
         $dbAsset = new Asset();
-        $param = [
-            'user_id' => $userId,
-            'coin_id' => $coinId
-        ];
-        $rsAsset = $dbAsset->getLine($param, 'profit,number,cost');
+        $rsAsset = $dbAsset->getLine($param, 'number,cost');
 
-        //持币成本
-        $profit = isset($rsAsset['profit']) ? (float)$rsAsset['profit'] : 0.00;
-        //成本价
-        $cost = isset($rsAsset['cost']) ? (float)$rsAsset['cost'] : 0.00;
-        //持币数
-        $number = isset($rsAsset['number']) ? (int)$rsAsset['number'] : 0;
-        //当前价
-        $price = $this->getPrice($coinId);
-        //成本价
-        if ($cost <= 0.00) {
-            $cost = !empty($number) ? $this->getDecimal($profit / $number) : 0.00; //持币成本单价
-        }
-        //持币总值: 当前价*持币数
-        $worth = round($price * $number, 2);
+        //买入
+        $dbAssetBuy = new AssetBuy();
+        $rsAssetBuy = $dbAssetBuy->getLine($param, 'total_cost,number');
 
-        //持仓成本
-        $costProfit = $profit;
-
-        //持仓盈亏
-        $holdProfit = $this->getDecimal(($price - $cost) * $number, 2);
-
-        //累积盈亏
+        //卖出
         $dbAssetSell = new AssetSell();
-        $param = [
-            'user_id' => $userId,
-            'coin_id' => $coinId
-        ];
-        $rsAssetSell = $dbAssetSell->getLine($param, 'profit');
-        $sellProfit = isset($rsAssetSell['profit']) ? $rsAssetSell['profit'] : 0.00;
-        $accumulatedProfit = $worth + $sellProfit - $costProfit;
+        $rsAssetSell = $dbAssetSell->getLine($param, 'total_profit,number');
 
-        $output['worth'] = $worth; //持币总值
+        //持仓数
+        $number = isset($rsAsset['number']) ? (int)$rsAsset['number'] : 0;
+        //持仓成本单价
+        $cost = isset($rsAsset['cost']) ? (float)$rsAsset['cost'] : 0.00;
+        //最新价
+        $price = $this->getPrice($coinId);
+
+        //买入交易总币数
+        $buyNumber = isset($rsAssetBuy['number']) ? (int)$rsAssetBuy['$rsAssetSell'] : 0;
+        //买入交易总成本
+        $buyTotalCost = isset($rsAssetBuy['total_cost']) ? (float)$rsAssetBuy['total_cost'] : 0.00;
+
+        //卖出交易总币数
+        $sellNumber = isset($rsAssetSell['number']) ? (int)$rsAssetSell['number'] : 0;
+        //卖出交易总成本
+        $sellTotalProfit = isset($rsAssetSell['total_profit']) ? (float)$rsAssetSell['total_profit'] : 0.00;
+
+        //持币成本单价
+        if ($cost == 0.00) {
+            $cost = !empty($buyNumber) ? $this->getDecimal($buyTotalCost / $buyNumber) : 0.00;
+        }
+
+        //总市值: 最新价 * 持币数
+        $worth = $this->getDecimal($price * $number);
+
+        //持仓成本 = 持仓成本单价 * 持仓数
+        $costProfit = $this->getDecimal($cost * $number);
+
+        //持仓盈亏 = (最新价 - 持仓成本单价) * 持仓数
+        $holdProfit = $this->getDecimal(($price - $cost) * $number);
+
+        //累积盈亏 = 总市值 + 卖出交易总成本 - 买入交易总币数 * 持仓成本单价
+        $accumulatedProfit = $worth + $sellTotalProfit - $buyNumber * $cost;
+
+        $output['worth'] = $worth; //总市值
         $output['price'] = $price; //最新价
         $output['number'] = $number; //持币数
         $output['cost'] = $cost; //成本价

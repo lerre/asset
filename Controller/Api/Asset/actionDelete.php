@@ -3,6 +3,7 @@
 namespace MyAPP\Controller\Api\Asset;
 
 use MyApp\Package\Db\Asset;
+use MyApp\Package\Db\AssetBuy;
 use MyApp\Package\Db\AssetPlace;
 use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\TransCount;
@@ -28,6 +29,9 @@ class actionDelete extends \MyAPP\Controller\Api
 
             $dbAsset = new Asset();
             $dbAsset->deleteAll($userId, $coinId);
+
+            $dbAssetSell = new AssetBuy();
+            $dbAssetSell->deleteAll($userId, $coinId);
 
             $dbAssetPlace = new AssetPlace();
             $dbAssetPlace->deleteAll($userId, $coinId);

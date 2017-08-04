@@ -3,6 +3,7 @@
 namespace MyAPP\Controller\Api\Asset;
 
 use MyApp\Package\Db\Asset;
+use MyApp\Package\Db\AssetBuy;
 use MyApp\Package\Db\AssetSell;
 use MyApp\Package\Db\Currency;
 
@@ -30,94 +31,119 @@ class actionList extends \MyAPP\Controller\Api
             }
         }
 
-        //卖出
-        $assetSellList = [];
-        $sellProfit = 0.00;
-
-        $dbAssetSell = new AssetSell();
         $param = [
             'user_id' => $userId
         ];
-        $field = 'coin_id,profit';
-        $rsAssetSellList = $dbAssetSell->getList($param, $field);
-        if (!empty($rsAssetSellList)) {
-            foreach ($rsAssetSellList as $k => $v) {
-                $assetSellList[$v['coin_id']] = $v['profit'];
-                $sellProfit += $v['profit'];
+
+        //买入
+        $assetBuyList = [];
+        $assetBuyTotalCost = 0.00;
+        $dbAssetBuy = new AssetBuy();
+        $rsAssetBuy = $dbAssetBuy->getList($param, 'coin_id,number,total_cost');
+        if (!empty($rsAssetBuy)) {
+            foreach ($rsAssetBuy as $k => $v) {
+                if (empty($v['coin_id'])) continue;
+                $assetBuyList[$v['coin_id']]['number'] = isset($v['number']) ? (int)$v['number'] : 0;
+                $assetBuyList[$v['coin_id']]['total_cost'] = isset($v['total_cost']) ? (float)$v['total_cost'] : 0.00;
+                $assetBuyTotalCost += $v['total_cost'];
             }
         }
 
-        //持币
+        //卖出
+        $assetSellList = [];
+        $assetSellTotalProfit = 0.00;
+        $dbAssetSell = new AssetSell();
+        $rsAssetSell = $dbAssetSell->getList($param, 'coin_id,number,total_profit');
+        if (!empty($rsAssetSell)) {
+            foreach ($rsAssetSell as $k => $v) {
+                if (empty($v['coin_id'])) continue;
+                $assetSellList[$v['coin_id']]['number'] = isset($v['number']) ? (int)$v['number'] : 0;
+                $assetSellList[$v['coin_id']]['total_profit'] = isset($v['total_cost']) ? (float)$v['total_cost'] : 0.00;
+                $assetSellTotalProfit += $v['total_profit'];
+            }
+        }
+
+        //持币数和持币成本单价
         $dbAsset = new Asset();
-        $param = [
-            'user_id' => $userId
-        ];
-        $field = 'coin_id,profit,number,cost';
+        $field = 'coin_id,number,cost';
         $order = 'create_at DESC';
         $rsAssetList = $dbAsset->getList($param, $field, $order);
 
         $assetList = [];
-        $worth = 0;
-        $costProfit = 0.00;
-        $holdProfit = 0.00;
+        $worthTotal = 0.00;
+        $costProfitTotal = 0.00;
+        $holdProfitTotal = 0.00;
+        $accumulatedProfitTotal = 0.00;
 
         if (!empty($rsAssetList)) {
             foreach ($rsAssetList as $k => $v) {
-                $coinId = !empty($v['coin_id']) ? $v['coin_id'] : '';
-                $number = !empty($v['number']) ? (int)$v['number'] : 0;
-                if ($number <= 0) { //不展示
+                $coinId = isset($v['coin_id']) ? $v['coin_id'] : '';
+                $number = isset($v['number']) ? (int)$v['number'] : 0;
+                $cost = isset($v['cost']) ? (float)$v['cost'] : 0.00;
+                if (empty($v['coin_id'])) {
                     continue;
                 }
+                $buyTotalCost = $assetBuyList[$coinId]['total_cost'];
+                $buyTotalNumber = $assetBuyList[$coinId]['number'];
+                $sellTotalProfit = $assetSellList[$coinId]['total_profit'];
+
+                //是否清仓？若已清仓，则不展示
+                if ($number <= 0) {
+                    continue;
+                }
+
+                $assetList[$k]['coin_id'] = $coinId; //币种
+                $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
+                $assetList[$k]['number'] = $number; //持仓成本单价
+                $assetList[$k]['cost'] = $cost; //持仓数
+
+                //是否收录？若未收录，则不计算
                 if (!in_array($coinId, $coinIdList)) { //未收录
                     $assetList[$k]['included'] = false;
-                    $assetList[$k]['coin_id'] = $coinId; //币种
-                    $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
                     continue;
                 } else {
                     $assetList[$k]['included'] = true;
                 }
-                $profit = !empty($v['profit']) ? (float)$v['profit'] : 0.00;
-                $cost = !empty($v['cost']) ? (float)$v['cost'] : 0.00;
-                if ($cost <= 0.00) {
-                    $cost = !empty($number) ? $this->getDecimal($profit / $number) : 0.00; //持币成本单价
+                //持币成本单价
+                if ($cost == 0.00) {
+                    $cost = !empty($buyTotalNumber) ? $this->getDecimal($buyTotalCost / $buyTotalNumber) : 0.00;
                 }
-                $price = $this->getPrice($coinId); //当前价格
-                if ($coinId && $number) {
-                    $assetList[$k]['coin_id'] = $coinId; //币种
-                    $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
-                    $assetList[$k]['price'] = $price; //最新价
-                    $assetList[$k]['cost'] = $cost; //成本价
-                    $assetList[$k]['worth'] = $this->getDecimal($price * $number); //市值
-                    $worth += $assetList[$k]['worth'];
-                    //持仓成本
-                    $costProfit += $profit;
-                    //持仓盈亏
-                    $assetList[$k]['hold_profit'] = ($price - $cost) * $number;
-                    $holdProfit += ($price - $cost) * $number;
-                    //持仓盈亏率
-                    $assetList[$k]['hold_profit_rate'] = !empty($profit) ? $this->getDecimal($assetList[$k]['hold_profit'] / $profit) : 0;
-                    //累计盈亏
-                    if (isset($assetSellList[$coinId])) {
-                        $assetList[$k]['accumulated_profile'] = $holdProfit + $assetSellList[$coinId];
-                    } else {
-                        $assetList[$k]['accumulated_profile'] = $holdProfit;
-                    }
-                    //累积盈亏率
-                    $assetList[$k]['accumulated_profile_rate'] = !empty($profit) ? $this->getDecimal($assetList[$k]['accumulated_profile'] / $profit) : 0;
-                }
+                //最新价
+                $price = $this->getPrice($coinId);
+                $assetList[$k]['price'] = $price; //最新价
+                //市值 = 最新价 * 持币数
+                $worth = $this->getDecimal($price * $number); //市值
+                $assetList[$k]['worth'] = $worth;
+                //总市值
+                $worthTotal += $worth;
+                //持仓成本 = 持仓成本单价 * 持仓数
+                $costProfit = $this->getDecimal($number * $cost);
+                //持仓总成本
+                $costProfitTotal += $costProfit;
+                //持仓盈亏 = (最新价 - 持仓成本单价) * 持仓数
+                $holdProfit = ($price - $cost) * $number;
+                $assetList[$k]['hold_profit'] = $holdProfit;
+                //持仓总盈亏
+                $holdProfitTotal += $holdProfit;
+                //持仓盈亏率 = 持仓盈亏 / 持仓成本
+                $assetList[$k]['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit) : 0;
+                //累积盈亏 = 总市值 + 卖出交易总成本 - 买入交易总币数 * 持仓成本单价
+                $accumulatedProfit = $worth + $sellTotalProfit - $buyTotalNumber * $cost;
+                $assetList[$k]['accumulated_profile'] = $accumulatedProfit;
+                //累积总盈亏
+                $accumulatedProfitTotal += $accumulatedProfit;
+                //累积盈亏率
+                $assetList[$k]['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0;
             }
         }
 
-        //累计盈亏
-        $accumulatedProfit = $worth + $sellProfit - $costProfit;
-
         $output['user_id'] = $userId;
-        $output['worth'] = $worth;
-        $output['cost_profit'] = $costProfit; //持仓成本
-        $output['hold_profit'] = $holdProfit; //持仓盈亏
-        $output['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit) : 0; //持仓盈亏率
-        $output['accumulated_profit'] = $accumulatedProfit; //累计盈亏
-        $output['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0; //累计盈亏率
+        $output['worth'] = $worthTotal;
+        $output['cost_profit'] = $costProfitTotal; //持仓总成本
+        $output['hold_profit'] = $holdProfitTotal; //持仓总盈亏
+        $output['hold_profit_rate'] = !empty($costProfitTotal) ? $this->getDecimal($holdProfitTotal / $costProfitTotal) : 0; //持仓总盈亏率
+        $output['accumulated_profit'] = $accumulatedProfitTotal; //累积总盈亏
+        $output['accumulated_profile_rate'] = !empty($costProfitTotal) ? $this->getDecimal($accumulatedProfitTotal / $costProfitTotal) : 0; //累计总盈亏率
         $output['list'] = array_values($assetList);
 
         $this->success($output);

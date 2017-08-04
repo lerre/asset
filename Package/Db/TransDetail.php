@@ -118,11 +118,11 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->incrAsset($userId, $coinId, $number, $number * $price);
-            if (empty($res)) {
-                $this->rollback();
-                return false;
-            }
+//            $res = $this->incrAsset($userId, $coinId, $number, $number * $price);
+//            if (empty($res)) {
+//                $this->rollback();
+//                return false;
+//            }
 
             $this->commit();
             $this->endTransaction();
@@ -166,11 +166,11 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->decrAsset($userId, $coinId, $number);
-            if (empty($res)) {
-                $this->rollback();
-                return false;
-            }
+//            $res = $this->decrAsset($userId, $coinId, $number);
+//            if (empty($res)) {
+//                $this->rollback();
+//                return false;
+//            }
 
             $this->commit();
             $this->endTransaction();
