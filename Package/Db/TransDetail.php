@@ -308,7 +308,7 @@ class TransDetail extends Db
     public function transBuyDelete($userId, $coinId, $id, $dataTransDetail)
     {
         $number = $dataTransDetail['number'];
-        $profit = $dataTransDetail['number'] * $dataTransDetail['price'];
+        $totalCost = $dataTransDetail['number'] * $dataTransDetail['price'];
 
         try {
             $this->beginTransaction();
@@ -319,7 +319,13 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->decrAsset($userId, $coinId, $number, $profit);
+            $res = $this->decrAssetBuy($userId, $coinId, $number, $totalCost);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->decrAsset($userId, $coinId, $number);
             if (empty($res)) {
                 $this->rollback();
                 return false;
@@ -346,8 +352,8 @@ class TransDetail extends Db
      */
     public function transSellDelete($userId, $coinId, $id, $dataTransDetail)
     {
-        $numberDiff = $dataTransDetail['number'];
-        $profitDiff = $dataTransDetail['number'] * $dataTransDetail['price'];
+        $number = $dataTransDetail['number'];
+        $totalProfit = $dataTransDetail['number'] * $dataTransDetail['price'];
 
         try {
             $this->beginTransaction();
@@ -358,13 +364,13 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->decrAssetSell($userId, $coinId, $profitDiff);
+            $res = $this->decrAssetSell($userId, $coinId, $number, $totalProfit);
             if (empty($res)) {
                 $this->rollback();
                 return false;
             }
 
-            $res = $this->incrAsset($userId, $coinId, $numberDiff);
+            $res = $this->incrAsset($userId, $coinId, $number);
             if (empty($res)) {
                 $this->rollback();
                 return false;

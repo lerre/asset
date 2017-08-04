@@ -98,12 +98,6 @@ class actionSell extends \MyAPP\Controller\Api
                     'accumulated_profit_rate' => $accumulatedProfitRate
                 ];
                 $dbAssetHistory->insertAssetHistory($data);
-
-                $dbAssetBuy = new AssetBuy();
-                $dbAssetBuy->deleteAll($userId, $coinId);
-
-                $dbAsset->deleteAll($userId, $coinId);
-                $dbAssetSell->deleteAll($userId, $coinId);
             }
 
             return $this->success([

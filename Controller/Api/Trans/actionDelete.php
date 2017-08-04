@@ -55,7 +55,7 @@ class actionDelete extends \MyAPP\Controller\Api
                 ];
                 $res = $dbAsset->getLine($param, 'id');
                 if (empty($res) || $res['number'] < $rsTransDetail['number']) {
-                    return $this->error(1005, '资产受限，无法操作');
+                    return $this->error(1005, '币数不足，无法删除');
                 }
                 $rs = $dbTransDetail->transBuyDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {
@@ -70,7 +70,7 @@ class actionDelete extends \MyAPP\Controller\Api
                 ];
                 $res = $dbAssetSell->getLine($param, 'id');
                 if (empty($res)) {
-                    return $this->error(1005, '无法操作');
+                    return $this->error(1005, '卖出不存在，无法删除');
                 }
                 $rs = $dbTransDetail->transSellDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {
