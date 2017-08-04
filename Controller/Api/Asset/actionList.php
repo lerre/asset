@@ -118,7 +118,7 @@ class actionList extends \MyAPP\Controller\Api
                 $assetList[$k]['price'] = $price; //最新价
                 //市值 = 最新价 * 持币数
                 $worth = $this->getDecimal($price * $number); //市值
-                $assetList[$k]['worth'] = $worth;
+                $assetList[$k]['worth'] = $this->getDecimal($worth, 2);
                 //总市值
                 $worthTotal += $worth;
                 //买入总成本
@@ -129,14 +129,14 @@ class actionList extends \MyAPP\Controller\Api
                 $costProfitTotal += $costProfit;
                 //持仓盈亏 = (最新价 - 持仓成本单价) * 持仓数
                 $holdProfit = ($price - $cost) * $number;
-                $assetList[$k]['hold_profit'] = $holdProfit;
+                $assetList[$k]['hold_profit'] = $this->getDecimal($holdProfit, 2);
                 //持仓总盈亏
                 $holdProfitTotal += $holdProfit;
                 //持仓盈亏率 = 持仓盈亏 / 持仓成本
                 $assetList[$k]['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit, 4) : 0;
                 //累积盈亏 = 总市值 + 卖出交易总成本 - 买入交易总币数 * 持仓成本单价
                 $accumulatedProfit = $worth + $sellTotalProfit - $buyTotalNumber * $cost;
-                $assetList[$k]['accumulated_profit'] = $accumulatedProfit;
+                $assetList[$k]['accumulated_profit'] = $this->getDecimal($accumulatedProfit, 2);
                 //累积总盈亏
                 $accumulatedProfitTotal += $accumulatedProfit;
                 //累积盈亏率
@@ -151,11 +151,11 @@ class actionList extends \MyAPP\Controller\Api
         }
 
         $output['user_id'] = $userId;
-        $output['worth'] = $worthTotal;
-        $output['cost_profit'] = $costProfitTotal; //持仓总成本
-        $output['hold_profit'] = $holdProfitTotal; //持仓总盈亏
+        $output['worth'] = $this->getDecimal($worthTotal, 2);
+        $output['cost_profit'] = $this->getDecimal($costProfitTotal, 2); //持仓总成本
+        $output['hold_profit'] = $this->getDecimal($holdProfitTotal, 2); //持仓总盈亏
         $output['hold_profit_rate'] = !empty($costProfitTotal) ? $this->getDecimal($holdProfitTotal / $costProfitTotal, 4) : 0; //持仓总盈亏率
-        $output['accumulated_profit'] = $accumulatedProfitTotal; //累积总盈亏
+        $output['accumulated_profit'] = $this->getDecimal($accumulatedProfitTotal, 2); //累积总盈亏
         $output['accumulated_profit_rate'] = !empty($buyTotalCostTotal) ? $this->getDecimal($accumulatedProfitTotal / $buyTotalCostTotal, 4) : 0; //累计总盈亏率
         $output['list'] = array_values($assetList);
 

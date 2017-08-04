@@ -97,14 +97,14 @@ class actionDetail extends \MyAPP\Controller\Api
         //累积盈亏 = 总市值 + 卖出交易总成本 - 买入交易总币数 * 持仓成本单价
         $accumulatedProfit = $worth + $sellTotalProfit - $buyNumber * $cost;
 
-        $output['worth'] = $worth; //总市值
-        $output['price'] = $price; //最新价
+        $output['worth'] = $this->getDecimal($worth, 2); //总市值
+        $output['price'] = $this->getDecimal($price, 2); //最新价
         $output['number'] = $number; //持币数
-        $output['cost'] = $cost; //成本价
-        $output['cost_profit'] = $costProfit; //持仓成本
-        $output['hold_profit'] = $holdProfit; //持仓盈亏
+        $output['cost'] = $this->getDecimal($cost, 2); //成本价
+        $output['cost_profit'] = $this->getDecimal($costProfit); //持仓成本
+        $output['hold_profit'] = $this->getDecimal($holdProfit); //持仓盈亏
         $output['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit, 4) : 0; //持仓盈亏率
-        $output['accumulated_profit'] = $accumulatedProfit; //累积盈亏
+        $output['accumulated_profit'] = $this->getDecimal($accumulatedProfit); //累积盈亏
         $output['accumulated_profit_rate'] = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost, 4) : 0; //累计盈亏率
 
         $output['debug'] = [
@@ -115,8 +115,6 @@ class actionDetail extends \MyAPP\Controller\Api
 
         if (!in_array($coinId, $coinIdList)) {
             $output['included'] = false;
-            $output['number'] = $number; //持币数
-            $output['cost'] = $cost; //成本价
         } else {
             $output['included'] = true;
         }
