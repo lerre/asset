@@ -260,12 +260,13 @@ abstract class Api extends Controller
     }
 
     /**
-     * 获取两位浮点数
+     * 获取N位浮点数
      * @param $data
+     * @param $dot
      * @return float
      */
-    function getDecimal($data)
+    function getDecimal($data, $dot = 2)
     {
-        return round($data, 2);
+        return round($data, $dot);
     }
 }

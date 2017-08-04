@@ -129,14 +129,14 @@ class actionList extends \MyAPP\Controller\Api
                 //持仓总盈亏
                 $holdProfitTotal += $holdProfit;
                 //持仓盈亏率 = 持仓盈亏 / 持仓成本
-                $assetList[$k]['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit) : 0;
+                $assetList[$k]['hold_profit_rate'] = !empty($costProfit) ? $this->getDecimal($holdProfit / $costProfit, 4) : 0;
                 //累积盈亏 = 总市值 + 卖出交易总成本 - 买入交易总币数 * 持仓成本单价
                 $accumulatedProfit = $worth + $sellTotalProfit - $buyTotalNumber * $cost;
                 $assetList[$k]['accumulated_profile'] = $accumulatedProfit;
                 //累积总盈亏
                 $accumulatedProfitTotal += $accumulatedProfit;
                 //累积盈亏率
-                $assetList[$k]['accumulated_profile_rate'] = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost) : 0;
+                $assetList[$k]['accumulated_profile_rate'] = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost, 4) : 0;
             }
         }
 
@@ -144,9 +144,9 @@ class actionList extends \MyAPP\Controller\Api
         $output['worth'] = $worthTotal;
         $output['cost_profit'] = $costProfitTotal; //持仓总成本
         $output['hold_profit'] = $holdProfitTotal; //持仓总盈亏
-        $output['hold_profit_rate'] = !empty($costProfitTotal) ? $this->getDecimal($holdProfitTotal / $costProfitTotal) : 0; //持仓总盈亏率
+        $output['hold_profit_rate'] = !empty($costProfitTotal) ? $this->getDecimal($holdProfitTotal / $costProfitTotal, 4) : 0; //持仓总盈亏率
         $output['accumulated_profit'] = $accumulatedProfitTotal; //累积总盈亏
-        $output['accumulated_profile_rate'] = !empty($buyTotalCostTotal) ? $this->getDecimal($accumulatedProfitTotal / $buyTotalCostTotal) : 0; //累计总盈亏率
+        $output['accumulated_profile_rate'] = !empty($buyTotalCostTotal) ? $this->getDecimal($accumulatedProfitTotal / $buyTotalCostTotal, 4) : 0; //累计总盈亏率
         $output['list'] = array_values($assetList);
 
         $this->success($output);
