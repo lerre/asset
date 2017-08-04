@@ -9,8 +9,6 @@ define('CONTROLLER_PREFIX', '\MyAPP\Controller\Api');
 //define('ASSETS',       WWW_ROOT . '/assets');
 //define('ADMIN_STATIC', WWW_ROOT . '/public/admin/static');
 
-// 开启错误提醒
-ini_set('display_errors', 1);
 date_default_timezone_set('PRC');
 
 require_once MyAPP_ROOT . '/utils/WxSpAes/WxSpAes.php';
