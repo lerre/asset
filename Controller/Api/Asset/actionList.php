@@ -86,7 +86,7 @@ class actionList extends \MyAPP\Controller\Api
                 }
                 $buyTotalCost = $assetBuyList[$coinId]['total_cost'];
                 $buyTotalNumber = $assetBuyList[$coinId]['number'];
-                $sellTotalProfit = $assetSellList[$coinId]['total_profit'];
+                $sellTotalProfit = isset($assetSellList[$coinId]) ? $assetSellList[$coinId]['total_profit'] : 0.00;
 
                 //是否清仓？若已清仓，则不展示
                 if ($number <= 0) {
@@ -96,7 +96,6 @@ class actionList extends \MyAPP\Controller\Api
                 $assetList[$k]['coin_id'] = $coinId; //币种
                 $assetList[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
                 $assetList[$k]['number'] = $number; //持仓成本单价
-                $assetList[$k]['cost'] = $cost; //持仓数
 
                 //是否收录？若未收录，则不计算
                 if (!in_array($coinId, $coinIdList)) { //未收录
@@ -109,6 +108,7 @@ class actionList extends \MyAPP\Controller\Api
                 if ($cost == 0.00) {
                     $cost = !empty($buyTotalNumber) ? $this->getDecimal($buyTotalCost / $buyTotalNumber) : 0.00;
                 }
+                $assetList[$k]['cost'] = $cost; //持仓数
                 //最新价
                 $price = $this->getPrice($coinId);
                 $assetList[$k]['price'] = $price; //最新价
