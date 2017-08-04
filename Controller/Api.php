@@ -265,7 +265,7 @@ abstract class Api extends Controller
      * @param $dot
      * @return float
      */
-    function getDecimal($data, $dot = 2)
+    function getDecimal($data, $dot = 6)
     {
         return round($data, $dot);
     }
