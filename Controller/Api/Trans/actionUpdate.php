@@ -78,6 +78,9 @@ class actionUpdate extends \MyAPP\Controller\Api
             }
 
             if ($type == self::TYPE_BUY) {
+                if (empty($res) || $res['number'] < $rsTransDetail['number']) {
+                    return $this->error(1005, '资产受限，无法操作');
+                }
                 $rs = $dbTransDetail->transBuyUpdate($userId, $coinId, $number, $price, $id, $rsTransDetail);
                 if (empty($rs)) {
                     return $this->error(1004, '编辑失败');

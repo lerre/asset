@@ -3,6 +3,7 @@
 namespace MyAPP\Controller\Api\Trans;
 
 use MyApp\Package\Db\Asset;
+use MyApp\Package\Db\AssetBuy;
 use MyApp\Package\Db\TransCount;
 use MyApp\Package\Db\TransDetail;
 use MyApp\Package\Db\AssetPlace;
@@ -36,6 +37,7 @@ class actionBuy extends \MyAPP\Controller\Api
                 $this->error(1001, '参数错误~');
             }
 
+            //初始化trans_count
             $dbTransCount = new TransCount();
             $param = [
                 'user_id' => $userId,
@@ -53,14 +55,15 @@ class actionBuy extends \MyAPP\Controller\Api
                 $this->error(1001, '今日买入已达上限，请明日再来~');
             }
 
-            //初始化asset
-            $dbAsset = new Asset();
             $param = [
                 'user_id' => $userId,
                 'coin_id' => $coinId
             ];
-            $res = $dbAsset->getLine($param, 'profit,number,cost');
-            if (empty($res)) {
+
+            //初始化asset
+            $dbAsset = new Asset();
+            $rsAsset = $dbAsset->getLine($param, 'number,cost');
+            if (empty($rsAsset)) {
                 $dbAsset->insertAsset([
                     'user_id' => $userId,
                     'coin_id' => $coinId,
@@ -69,6 +72,19 @@ class actionBuy extends \MyAPP\Controller\Api
                 ]);
             }
 
+            //初始化asset_buy
+            $dbAssetBuy = new AssetBuy();
+            $rsAssetBuy = $dbAssetBuy->getLine($param, 'number,total_cost');
+            if (empty($rsAssetBuy)) {
+                $dbAssetBuy->insertAssetBuy([
+                    'user_id' => $userId,
+                    'coin_id' => $coinId,
+                    'create_at' => $currDate,
+                    'update_at' => $currDate
+                ]);
+            }
+
+            //买入
             $dbTransDetail = new TransDetail();
             $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place);
             if (empty($res)) {
@@ -80,8 +96,8 @@ class actionBuy extends \MyAPP\Controller\Api
 
             //更新成本均价
             $res = $dbAsset->getLine($param, 'number,cost');
-            if (!empty($res) && $res['cost'] != 0.00) {
-                $cost = !empty($res['number']) ? $this->getDecimal($res['profit'] / $res['number']) : 0.00;
+            if (!empty($res) && isset($res['cost']) && $res['cost'] != '0.00') {
+                $cost = !empty($res['number']) ? $this->getDecimal($rsAssetBuy['total_cost'] / $rsAssetBuy['number']) : 0.00;
                 $data = [
                     'cost' => $cost
                 ];

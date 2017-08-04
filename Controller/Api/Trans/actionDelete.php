@@ -41,7 +41,7 @@ class actionDelete extends \MyAPP\Controller\Api
                 'coin_id' => $coinId,
                 'type' => $type
             ];
-            $rsTransDetail = $dbTransDetail->getById($param, 'number,price,place,cost');
+            $rsTransDetail = $dbTransDetail->getById($param, 'number,price');
             if (empty($rsTransDetail)) {
                 return $this->error(1004, '交易记录不存在');
             }
@@ -54,13 +54,8 @@ class actionDelete extends \MyAPP\Controller\Api
                     'coin_id' => $coinId
                 ];
                 $res = $dbAsset->getLine($param, 'id');
-                if (empty($res)) {
-                    $dbAsset->insertAsset([
-                        'user_id' => $userId,
-                        'coin_id' => $coinId,
-                        'create_at' => $currDate,
-                        'update_at' => $currDate
-                    ]);
+                if (empty($res) || $res['number'] < $rsTransDetail['number']) {
+                    return $this->error(1005, '资产受限，无法操作');
                 }
                 $rs = $dbTransDetail->transBuyDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {
@@ -75,12 +70,7 @@ class actionDelete extends \MyAPP\Controller\Api
                 ];
                 $res = $dbAssetSell->getLine($param, 'id');
                 if (empty($res)) {
-                    $dbAssetSell->insertAssetSell([
-                        'user_id' => $userId,
-                        'coin_id' => $coinId,
-                        'create_at' => $currDate,
-                        'update_at' => $currDate
-                    ]);
+                    return $this->error(1005, '无法操作');
                 }
                 $rs = $dbTransDetail->transSellDelete($userId, $coinId, $id, $rsTransDetail);
                 if (empty($rs)) {

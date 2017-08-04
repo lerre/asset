@@ -71,7 +71,7 @@ class actionDetail extends \MyAPP\Controller\Api
         $price = $this->getPrice($coinId);
 
         //买入交易总币数
-        $buyNumber = isset($rsAssetBuy['number']) ? (int)$rsAssetBuy['$rsAssetSell'] : 0;
+        $buyNumber = isset($rsAssetBuy['number']) ? (int)$rsAssetBuy['number'] : 0;
         //买入交易总成本
         $buyTotalCost = isset($rsAssetBuy['total_cost']) ? (float)$rsAssetBuy['total_cost'] : 0.00;
 

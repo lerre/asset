@@ -15,6 +15,7 @@ class TransDetail extends Db
     protected $databaseName = 'asset';
     protected $tableName = 'trans_detail';
     protected $tableAssetName = 'asset';
+    protected $tableAssetBuyName = 'asset_buy';
     protected $tableAssetSellName = 'asset_sell';
 
     public function getLine($param, $field = '*')
@@ -66,37 +67,53 @@ class TransDetail extends Db
         return $this->delete($this->tableName, $where, $whereParam);
     }
 
-    private function incrAsset($userId, $coinId, $number, $profit = 0.00)
+    private function incrAsset($userId, $coinId, $number)
     {
         $currDate = date('Y-m-d H:i:s');
-        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number+' . $number . ',profit=profit+' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number+' . $number . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    private function decrAsset($userId, $coinId, $number, $profit = 0.00)
+    private function decrAsset($userId, $coinId, $number)
     {
         $currDate = date('Y-m-d H:i:s');
-        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number-' . $number . ',profit=profit-' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $sql = 'UPDATE ' . $this->tableAssetName . ' SET number=number-' . $number . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    private function incrAssetSell($userId, $coinId, $profit = 0.00)
+    private function incrAssetBuy($userId, $coinId, $number, $totalCost = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
-        $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET profit=profit+' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $sql = 'UPDATE ' . $this->tableAssetBuyName . ' SET number=number+' . $number . ',total_cost=total_cost+' . $totalCost . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
-    private function decrAssetSell($userId, $coinId, $profit = 0.00)
+    private function decrAssetBuy($userId, $coinId, $number, $totalCost = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
-        $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET profit=profit-' . $profit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $sql = 'UPDATE ' . $this->tableAssetBuyName . ' SET number=number+' . $number . ',total_cost=total_cost-' . $totalCost . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        return $this->exec('UPDATE', $sql);
+    }
+
+    private function incrAssetSell($userId, $coinId, $number, $totalProfit = 0.00)
+    {
+        $currDate = date('Y-m-d H:i:s');
+        $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET number=number+' . $number . ',total_profit=total_profit+' . $totalProfit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        return $this->exec('UPDATE', $sql);
+    }
+
+    private function decrAssetSell($userId, $coinId, $number, $totalProfit = 0.00)
+    {
+        $currDate = date('Y-m-d H:i:s');
+        $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET number=number+' . $number . ',total_profit=total_profit+' . $totalProfit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
     public function buy($userId, $date, $coinId, $number, $price, $place)
     {
         $currDate = date('Y-m-d H:i:s');
+
+        $totalCost = $number * $price;
 
         try {
             $this->beginTransaction();
@@ -118,11 +135,17 @@ class TransDetail extends Db
                 return false;
             }
 
-//            $res = $this->incrAsset($userId, $coinId, $number, $number * $price);
-//            if (empty($res)) {
-//                $this->rollback();
-//                return false;
-//            }
+            $res = $this->incrAssetBuy($userId, $coinId, $number, $totalCost);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
+
+            $res = $this->incrAsset($userId, $coinId, $number);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
 
             $this->commit();
             $this->endTransaction();
@@ -139,7 +162,7 @@ class TransDetail extends Db
     {
         $currDate = date('Y-m-d H:i:s');
 
-        $profit = $number * $price;
+        $totalProfit = $number * $price;
 
         try {
             $this->beginTransaction();
@@ -160,21 +183,22 @@ class TransDetail extends Db
                 return false;
             }
 
-            $res = $this->incrAssetSell($userId, $coinId, $profit);
+            $res = $this->incrAssetSell($userId, $coinId, $number, $totalProfit);
             if (empty($res)) {
                 $this->rollback();
                 return false;
             }
 
-//            $res = $this->decrAsset($userId, $coinId, $number);
-//            if (empty($res)) {
-//                $this->rollback();
-//                return false;
-//            }
+            $res = $this->decrAsset($userId, $coinId, $number);
+            if (empty($res)) {
+                $this->rollback();
+                return false;
+            }
 
             $this->commit();
             $this->endTransaction();
         } catch (\PDOException $e) {
+            throw $e;exit;
             $this->rollback();
             $this->endTransaction();
             return false;
