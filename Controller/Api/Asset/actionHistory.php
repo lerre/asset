@@ -38,8 +38,14 @@ class actionHistory extends \MyAPP\Controller\Api
         $rsAssetHistory = $dbAssetHistory->getList($param, '*', 'create_at desc', 1000);
         if (!empty($rsAssetHistory)) {
             foreach ($rsAssetHistory as $k => $v) {
-                $assetHistory[$k]['coin_id'] = $v['coin_id'];
-                $assetHistory[$k]['coin'] = isset($coinIdIndex[$v['coin_id']]) ? $coinIdIndex[$v['coin_id']] : ''; //币种缩写
+                $coinId = isset($v['coin_id']) ? $v['coin_id'] : '';
+                if (!in_array($coinId, $coinIdList)) { //未收录
+                    $assetHistory[$k]['included'] = false;
+                } else {
+                    $assetHistory[$k]['included'] = true;
+                }
+                $assetHistory[$k]['coin_id'] = $coinId;
+                $assetHistory[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
                 $assetHistory[$k]['accumulated_profit'] = $this->getDecimal($v['accumulated_profit']);
                 $assetHistory[$k]['accumulated_profit_rate'] = $this->getDecimal($v['accumulated_profit_rate'], 4);
             }
