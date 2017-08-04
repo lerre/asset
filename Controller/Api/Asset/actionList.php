@@ -73,6 +73,7 @@ class actionList extends \MyAPP\Controller\Api
         $worthTotal = 0.00;
         $costProfitTotal = 0.00;
         $holdProfitTotal = 0.00;
+        $buyTotalCostTotal = 0.00;
         $accumulatedProfitTotal = 0.00;
 
         if (!empty($rsAssetList)) {
@@ -116,6 +117,8 @@ class actionList extends \MyAPP\Controller\Api
                 $assetList[$k]['worth'] = $worth;
                 //总市值
                 $worthTotal += $worth;
+                //买入总成本
+                $buyTotalCostTotal += $buyTotalCost;
                 //持仓成本 = 持仓成本单价 * 持仓数
                 $costProfit = $this->getDecimal($number * $cost);
                 //持仓总成本
@@ -133,7 +136,7 @@ class actionList extends \MyAPP\Controller\Api
                 //累积总盈亏
                 $accumulatedProfitTotal += $accumulatedProfit;
                 //累积盈亏率
-                $assetList[$k]['accumulated_profile_rate'] = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0;
+                $assetList[$k]['accumulated_profile_rate'] = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost) : 0;
             }
         }
 
@@ -143,7 +146,7 @@ class actionList extends \MyAPP\Controller\Api
         $output['hold_profit'] = $holdProfitTotal; //持仓总盈亏
         $output['hold_profit_rate'] = !empty($costProfitTotal) ? $this->getDecimal($holdProfitTotal / $costProfitTotal) : 0; //持仓总盈亏率
         $output['accumulated_profit'] = $accumulatedProfitTotal; //累积总盈亏
-        $output['accumulated_profile_rate'] = !empty($costProfitTotal) ? $this->getDecimal($accumulatedProfitTotal / $costProfitTotal) : 0; //累计总盈亏率
+        $output['accumulated_profile_rate'] = !empty($buyTotalCostTotal) ? $this->getDecimal($accumulatedProfitTotal / $buyTotalCostTotal) : 0; //累计总盈亏率
         $output['list'] = array_values($assetList);
 
         $this->success($output);

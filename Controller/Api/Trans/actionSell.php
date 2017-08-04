@@ -84,12 +84,10 @@ class actionSell extends \MyAPP\Controller\Api
                 if (isset($rsAsset['cost']) && $rsAsset['cost'] == '0.00') {
                     $cost = !empty($buyNumber) ? $this->getDecimal($buyTotalCost / $buyNumber) : 0.00;
                 }
-                //持仓成本 = 持仓成本单价 * 持仓数
-                $costProfit = $this->getDecimal(($rsAsset['number'] - $number) * $cost);
                 //累积盈亏
                 $accumulatedProfit = $worth + $sellTotalProfit - $buyNumber * $cost;
                 //累积盈亏率
-                $accumulatedProfitRate = !empty($costProfit) ? $this->getDecimal($accumulatedProfit / $costProfit) : 0; //累计盈亏率
+                $accumulatedProfitRate = !empty($buyTotalCost) ? $this->getDecimal($accumulatedProfit / $buyTotalCost) : 0; //累计盈亏率
 
                 //清仓
                 $dbAssetHistory = new AssetHistory();
