@@ -84,6 +84,13 @@ class actionBuy extends \MyAPP\Controller\Api
                 ]);
             }
 
+            if (!isset($rsAssetBuy['total_cost'])) {
+                $rsAssetBuy['total_cost'] = 0;
+            }
+            if ($rsAssetBuy['total_cost'] + $number * $price > 999999999999) {
+                return $this->error(1003, '交易金额超过最大限制，无法交易');
+            }
+
             //买入
             $dbTransDetail = new TransDetail();
             $res = $dbTransDetail->buy($userId, $date, $coinId, $number, $price, $place);

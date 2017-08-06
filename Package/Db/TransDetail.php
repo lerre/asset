@@ -150,7 +150,6 @@ class TransDetail extends Db
             $this->commit();
             $this->endTransaction();
         } catch (\PDOException $e) {
-            throw $e;
             $this->rollback();
             $this->endTransaction();
             return false;
