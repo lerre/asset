@@ -100,11 +100,10 @@ class actionSell extends \MyAPP\Controller\Api
                 ];
                 $dbAssetHistory->insertAssetHistory($data);
 
-                $dbAssetBuy = new AssetBuy();
-                $dbAssetBuy->deleteAll($userId, $coinId);
-
                 $dbAsset->deleteAll($userId, $coinId);
+                $dbAssetBuy->deleteAll($userId, $coinId);
                 $dbAssetSell->deleteAll($userId, $coinId);
+                $dbTransDetail->deleteAll($userId, $coinId);
             }
 
             return $this->success([
