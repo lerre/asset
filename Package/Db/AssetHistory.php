@@ -30,7 +30,7 @@ class AssetHistory extends Db
 
     public function deleteAll($userId, $coinId, $id)
     {
-        $where = 'id = : id AND user_id = :user_id And coin_id = :coin_id';
+        $where = 'id = :id AND user_id = :user_id And coin_id = :coin_id';
         $whereParam = [
             'id' => $id,
             'user_id' => $userId,
