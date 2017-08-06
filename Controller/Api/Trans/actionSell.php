@@ -61,6 +61,13 @@ class actionSell extends \MyAPP\Controller\Api
                 ]);
             }
 
+            if (!isset($rsAssetSell['total_cost'])) {
+                $rsAssetSell['total_cost'] = 0;
+            }
+            if ($rsAssetSell['total_cost'] + $number * $price > 999999999999) {
+                return $this->error(1005, '交易金额超过最大限制，无法交易');
+            }
+
             //卖出
             $dbTransDetail = new TransDetail();
             $res = $dbTransDetail->sell($userId, $date, $coinId, $number, $price);
