@@ -18,9 +18,7 @@ class actionDelete extends \MyAPP\Controller\Api
             if (empty($this->userId)) {
                 $this->error(1001, '用户未登录');
             }
-
             $userId = $this->userId;
-            $currDate = date('Y-m-d H:i:s');
 
             $raw = $this->request->getRaw();
             $id = isset($raw['id']) ? $raw['id'] : '';
