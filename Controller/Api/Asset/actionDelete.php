@@ -28,9 +28,10 @@ class actionDelete extends \MyAPP\Controller\Api
             $raw = $this->request->getRaw();
             $type = isset($raw['type']) ? $raw['type'] : '';
             $coinId = isset($raw['coin_id']) ? $raw['coin_id'] : '';
+            $id = isset($raw['id']) ? $raw['id'] : 0;
 
             if ($type == 'history') {
-                $this->deleteAssetHistory($userId, $coinId);
+                $this->deleteAssetHistory($userId, $coinId, $id);
             } else {
                 $this->deleteAsset($userId, $coinId);
             }
@@ -62,9 +63,9 @@ class actionDelete extends \MyAPP\Controller\Api
         $dbTransDetail->deleteAll($userId, $coinId);
     }
 
-    private function deleteAssetHistory($userId, $coinId)
+    private function deleteAssetHistory($userId, $coinId, $id)
     {
         $dbAsset = new AssetHistory();
-        $dbAsset->deleteAll($userId, $coinId);
+        $dbAsset->deleteAll($userId, $coinId, $id);
     }
 }

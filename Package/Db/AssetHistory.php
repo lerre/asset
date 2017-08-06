@@ -28,10 +28,11 @@ class AssetHistory extends Db
         return $this->insert($this->tableName, $data, 'ignore');
     }
 
-    public function deleteAll($userId, $coinId)
+    public function deleteAll($userId, $coinId, $id)
     {
-        $where = 'user_id = :user_id And coin_id = :coin_id';
+        $where = 'id = : id AND user_id = :user_id And coin_id = :coin_id';
         $whereParam = [
+            'id' => $id,
             'user_id' => $userId,
             'coin_id' => $coinId
         ];

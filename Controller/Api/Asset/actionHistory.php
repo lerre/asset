@@ -46,6 +46,7 @@ class actionHistory extends \MyAPP\Controller\Api
                 }
                 $assetHistory[$k]['coin_id'] = $coinId;
                 $assetHistory[$k]['coin'] = isset($coinIdIndex[$coinId]) ? $coinIdIndex[$coinId] : ''; //币种缩写
+                $assetHistory[$k]['id'] = $v['id'];
                 $assetHistory[$k]['accumulated_profit'] = $this->getDecimal($v['accumulated_profit']);
                 $assetHistory[$k]['accumulated_profit_rate'] = $this->getDecimal($v['accumulated_profit_rate'], 4);
             }
