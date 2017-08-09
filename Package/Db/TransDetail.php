@@ -91,7 +91,7 @@ class TransDetail extends Db
     private function decrAssetBuy($userId, $coinId, $number, $totalCost = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
-        $sql = 'UPDATE ' . $this->tableAssetBuyName . ' SET number=number+' . $number . ',total_cost=total_cost-' . $totalCost . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $sql = 'UPDATE ' . $this->tableAssetBuyName . ' SET number=number-' . $number . ',total_cost=total_cost-' . $totalCost . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
@@ -105,7 +105,7 @@ class TransDetail extends Db
     private function decrAssetSell($userId, $coinId, $number, $totalProfit = 0.00)
     {
         $currDate = date('Y-m-d H:i:s');
-        $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET number=number+' . $number . ',total_profit=total_profit+' . $totalProfit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
+        $sql = 'UPDATE ' . $this->tableAssetSellName . ' SET number=number-' . $number . ',total_profit=total_profit-' . $totalProfit . ',update_at="' . $currDate . '" WHERE user_id=' . $userId . ' AND coin_id="' . $coinId . '" LIMIT 1';
         return $this->exec('UPDATE', $sql);
     }
 
